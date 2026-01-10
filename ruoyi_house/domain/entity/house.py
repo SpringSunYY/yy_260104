@@ -6,7 +6,7 @@
 from typing import Optional, Annotated
 from pydantic import Field, BeforeValidator
 from ruoyi_common.base.model import BaseEntity
-from ruoyi_common.base.transformer import str_to_int
+from ruoyi_common.base.transformer import str_to_int, str_to_float
 from ruoyi_common.base.schema_excel import ExcelField
 from ruoyi_common.base.schema_vo import VoField
 
@@ -66,24 +66,26 @@ class House(BaseEntity):
         Optional[str],
         Field(default=None, description="城市"),
         VoField(query=True),
-        ExcelField(name="城市")
+        ExcelField(name="城市",action='export')
     ]
     # 镇
     town: Annotated[
         Optional[str],
         Field(default=None, description="镇"),
         VoField(query=True),
-        ExcelField(name="镇")
+        ExcelField(name="镇",action='export')
     ]
     # 总价
     total_price: Annotated[
         Optional[float],
+        BeforeValidator(str_to_float),
         Field(default=None, description="总价"),
         ExcelField(name="总价")
     ]
     # 单价
     unit_price: Annotated[
         Optional[float],
+        BeforeValidator(str_to_float),
         Field(default=None, description="单价"),
         ExcelField(name="单价")
     ]
@@ -96,8 +98,8 @@ class House(BaseEntity):
     ]
     # 建筑面积
     area_size: Annotated[
-        Optional[int],
-        BeforeValidator(str_to_int),
+        Optional[float],
+        BeforeValidator(str_to_float),
         Field(default=None, description="建筑面积"),
         ExcelField(name="建筑面积")
     ]
@@ -120,11 +122,12 @@ class House(BaseEntity):
         BeforeValidator(str_to_int),
         Field(default=None, description="楼层高度"),
         VoField(query=True),
-        ExcelField(name="楼层高度")
+        ExcelField(name="楼层高度",action='export')
     ]
     # 装修面积单价
     decoration_area: Annotated[
         Optional[float],
+        BeforeValidator(str_to_float),
         Field(default=None, description="装修面积单价"),
         ExcelField(name="装修面积单价")
     ]
@@ -133,7 +136,7 @@ class House(BaseEntity):
         Optional[str],
         Field(default=None, description="楼层类型"),
         VoField(query=True),
-        ExcelField(name="楼层类型")
+        ExcelField(name="楼层类型",action='export')
     ]
     # 建筑年代
     building_year: Annotated[

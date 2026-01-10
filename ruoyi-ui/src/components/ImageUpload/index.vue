@@ -19,7 +19,7 @@
     >
       <i class="el-icon-plus"></i>
     </el-upload>
-    
+
     <!-- 上传提示 -->
     <div class="el-upload__tip" slot="tip" v-if="showTip">
       请上传
@@ -44,6 +44,7 @@
 
 <script>
 import { getToken } from "@/utils/auth";
+import {isExternal} from "@/utils/validate";
 
 export default {
   props: {
@@ -67,6 +68,10 @@ export default {
     isShowTip: {
       type: Boolean,
       default: true
+    },
+    separator: {
+      type: String,
+      default: ","
     }
   },
   data() {
@@ -184,7 +189,7 @@ export default {
     // 对象转成指定字符串分隔
     listToString(list, separator) {
       let strs = "";
-      separator = separator || ",";
+      separator = separator || this.separator;
       for (let i in list) {
         strs += list[i].url.replace(this.baseUrl, "") + separator;
       }

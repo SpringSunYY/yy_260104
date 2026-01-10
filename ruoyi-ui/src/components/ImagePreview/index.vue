@@ -28,23 +28,28 @@ export default {
     height: {
       type: [Number, String],
       default: ""
+    },
+    separator: {
+      type: String,
+      default: ","
     }
   },
   computed: {
     realSrc() {
-      let real_src = this.src.split(",")[0];
+      let real_src = this.src.split(this.separator)[0];
       if (isExternal(real_src)) {
         return real_src;
       }
       return process.env.VUE_APP_BASE_API + real_src;
     },
     realSrcList() {
-      let real_src_list = this.src.split(",");
+      let real_src_list = this.src.split(this.separator);
       let srcList = [];
       real_src_list.forEach(item => {
         if (isExternal(item)) {
           return srcList.push(item);
         }
+
         return srcList.push(process.env.VUE_APP_BASE_API + item);
       });
       return srcList;

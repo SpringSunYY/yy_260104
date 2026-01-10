@@ -144,7 +144,8 @@
           size="mini"
           @click="handleAdd"
           v-hasPermi="['house:house:add']"
-        >新增</el-button>
+        >新增
+        </el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -155,7 +156,8 @@
           :disabled="single"
           @click="handleUpdate"
           v-hasPermi="['house:house:edit']"
-        >修改</el-button>
+        >修改
+        </el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -166,7 +168,8 @@
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['house:house:remove']"
-        >删除</el-button>
+        >删除
+        </el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -176,7 +179,8 @@
           size="mini"
           @click="handleExport"
           v-hasPermi="['house:house:export']"
-        >导出</el-button>
+        >导出
+        </el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -186,47 +190,81 @@
           size="mini"
           @click="handleImport"
           v-hasPermi="['house:house:import']"
-        >导入</el-button>
+        >导入
+        </el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
     </el-row>
 
     <el-table :loading="loading" :data="houseList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="房源编号" :show-overflow-tooltip="true" v-if="columns[0].visible" prop="hoseId" />
-      <el-table-column label="房源编码" align="center" :show-overflow-tooltip="true" v-if="columns[1].visible" prop="houseCode" />
+      <el-table-column type="selection" width="55" align="center"/>
+      <el-table-column label="房源编号" :show-overflow-tooltip="true" v-if="columns[0].visible" prop="hoseId"/>
+      <el-table-column label="房源编码" align="center" :show-overflow-tooltip="true" v-if="columns[1].visible"
+                       prop="houseCode"/>
       <el-table-column label="封面图片" align="center" v-if="columns[2].visible" prop="coverImage" width="100">
         <template slot-scope="scope">
           <image-preview :src="scope.row.coverImage" :width="50" :height="50"/>
         </template>
       </el-table-column>
-      <el-table-column label="房源标题" align="center" :show-overflow-tooltip="true" v-if="columns[3].visible" prop="title" />
-      <el-table-column label="小区名称" align="center" :show-overflow-tooltip="true" v-if="columns[4].visible" prop="community" />
-      <el-table-column label="小区地址" align="center" :show-overflow-tooltip="true" v-if="columns[5].visible" prop="address" />
-      <el-table-column label="所属区域" align="center" :show-overflow-tooltip="true" v-if="columns[6].visible" prop="area" />
-      <el-table-column label="城市" align="center" :show-overflow-tooltip="true" v-if="columns[7].visible" prop="city" />
-      <el-table-column label="镇" align="center" :show-overflow-tooltip="true" v-if="columns[8].visible" prop="town" />
-      <el-table-column label="总价" align="center" :show-overflow-tooltip="true" v-if="columns[9].visible" prop="totalPrice" />
-      <el-table-column label="单价" align="center" :show-overflow-tooltip="true" v-if="columns[10].visible" prop="unitPrice" />
-      <el-table-column label="户型" align="center" :show-overflow-tooltip="true" v-if="columns[11].visible" prop="houseType" />
-      <el-table-column label="建筑面积" align="center" :show-overflow-tooltip="true" v-if="columns[12].visible" prop="areaSize" />
-      <el-table-column label="朝向" align="center" :show-overflow-tooltip="true" v-if="columns[13].visible" prop="orientation" />
-      <el-table-column label="楼层" align="center" :show-overflow-tooltip="true" v-if="columns[14].visible" prop="floor" />
-      <el-table-column label="楼层高度" align="center" :show-overflow-tooltip="true" v-if="columns[15].visible" prop="floorHeight" />
-      <el-table-column label="装修面积单价" align="center" :show-overflow-tooltip="true" v-if="columns[16].visible" prop="decorationArea" />
-      <el-table-column label="楼层类型" align="center" :show-overflow-tooltip="true" v-if="columns[17].visible" prop="floorType" />
-      <el-table-column label="建筑年代" align="center" :show-overflow-tooltip="true" v-if="columns[18].visible" prop="buildingYear" />
-      <el-table-column label="装修类型" align="center" :show-overflow-tooltip="true" v-if="columns[19].visible" prop="decorationType" />
-      <el-table-column label="房源标签" align="center" :show-overflow-tooltip="true" v-if="columns[20].visible" prop="tags" />
-      <el-table-column label="产权性质" align="center" :show-overflow-tooltip="true" v-if="columns[21].visible" prop="propertyRightType" />
-      <el-table-column label="产权年限" align="center" :show-overflow-tooltip="true" v-if="columns[22].visible" prop="propertyRightYear" />
-      <el-table-column label="房源介绍" align="center" :show-overflow-tooltip="true" v-if="columns[23].visible" prop="houseIntro" />
-      <el-table-column label="房源图片" align="center" v-if="columns[24].visible" prop="imageUrls" width="100">
+      <el-table-column label="房源标题" align="center" :show-overflow-tooltip="true" v-if="columns[3].visible"
+                       prop="title"/>
+      <el-table-column label="小区名称" align="center" :show-overflow-tooltip="true" v-if="columns[4].visible"
+                       prop="community"/>
+      <el-table-column label="小区地址" align="center" :show-overflow-tooltip="true" v-if="columns[5].visible"
+                       prop="address"/>
+      <el-table-column label="所属区域" align="center" :show-overflow-tooltip="true" v-if="columns[6].visible"
+                       prop="area"/>
+      <el-table-column label="城市" align="center" :show-overflow-tooltip="true" v-if="columns[7].visible" prop="city"/>
+      <el-table-column label="镇" align="center" :show-overflow-tooltip="true" v-if="columns[8].visible" prop="town"/>
+      <el-table-column label="总价" align="center" :show-overflow-tooltip="true" v-if="columns[9].visible"
+                       prop="totalPrice"/>
+      <el-table-column label="单价" align="center" :show-overflow-tooltip="true" v-if="columns[10].visible"
+                       prop="unitPrice"/>
+      <el-table-column label="户型" align="center" :show-overflow-tooltip="true" v-if="columns[11].visible"
+                       prop="houseType"/>
+      <el-table-column label="建筑面积" align="center" :show-overflow-tooltip="true" v-if="columns[12].visible"
+                       prop="areaSize"/>
+      <el-table-column label="朝向" align="center" :show-overflow-tooltip="true" v-if="columns[13].visible"
+                       prop="orientation"/>
+      <el-table-column label="楼层" align="center" :show-overflow-tooltip="true" v-if="columns[14].visible"
+                       prop="floor"/>
+      <el-table-column label="楼层高度" align="center" :show-overflow-tooltip="true" v-if="columns[15].visible"
+                       prop="floorHeight"/>
+      <el-table-column label="装修面积单价" align="center" :show-overflow-tooltip="true" v-if="columns[16].visible"
+                       prop="decorationArea"/>
+      <el-table-column label="楼层类型" align="center" :show-overflow-tooltip="true" v-if="columns[17].visible"
+                       prop="floorType"/>
+      <el-table-column label="建筑年代" align="center" :show-overflow-tooltip="true" v-if="columns[18].visible"
+                       prop="buildingYear"/>
+      <el-table-column label="装修类型" align="center" :show-overflow-tooltip="true" v-if="columns[19].visible"
+                       prop="decorationType"/>
+      <el-table-column label="房源标签" align="center" :show-overflow-tooltip="true" v-if="columns[20].visible"
+                       prop="tags">
         <template slot-scope="scope">
-          <image-preview :src="scope.row.imageUrls" :width="50" :height="50"/>
+          <div v-if="scope.row.tags && scope.row.tags.trim() !== ''" style="display: flex; flex-wrap: wrap; gap: 4px;">
+            <el-tag
+              v-for="(tag, index) in scope.row.tags.split(';').filter(item => item.trim() !== '')"
+              :key="index"
+              size="small">
+              {{ tag.trim() }}
+            </el-tag>
+          </div>
+          <span v-else>无</span>
         </template>
       </el-table-column>
-      <el-table-column label="物业类型" align="center" :show-overflow-tooltip="true" v-if="columns[25].visible" prop="propertyType" />
+      <el-table-column label="产权性质" align="center" :show-overflow-tooltip="true" v-if="columns[21].visible"
+                       prop="propertyRightType"/>
+      <el-table-column label="产权年限" align="center" :show-overflow-tooltip="true" v-if="columns[22].visible"
+                       prop="propertyRightYear"/>
+      <el-table-column label="房源介绍" align="center" :show-overflow-tooltip="true" v-if="columns[23].visible"
+                       prop="houseIntro"/>
+      <el-table-column label="房源图片" align="center" v-if="columns[24].visible" prop="imageUrls" width="100">
+        <template slot-scope="scope">
+          <image-preview separator=";" :src="scope.row.imageUrls" :width="50" :height="50"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="物业类型" align="center" :show-overflow-tooltip="true" v-if="columns[25].visible"
+                       prop="propertyType"/>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -235,14 +273,16 @@
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['house:house:edit']"
-          >修改</el-button>
+          >修改
+          </el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['house:house:remove']"
-          >删除</el-button>
+          >删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -259,82 +299,82 @@
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="房源编号" prop="hoseId">
-          <el-input v-model="form.hoseId" placeholder="请输入房源编号" />
+          <el-input v-model="form.hoseId" placeholder="请输入房源编号"/>
         </el-form-item>
         <el-form-item label="房源编码" prop="houseCode">
-          <el-input v-model="form.houseCode" placeholder="请输入房源编码" />
+          <el-input v-model="form.houseCode" placeholder="请输入房源编码"/>
         </el-form-item>
         <el-form-item label="封面图片" prop="coverImage">
-          <image-upload v-model="form.coverImage"/>
+          <image-upload separator=";" v-model="form.coverImage"/>
         </el-form-item>
         <el-form-item label="房源标题" prop="title">
-          <el-input v-model="form.title" placeholder="请输入房源标题" />
+          <el-input v-model="form.title" placeholder="请输入房源标题"/>
         </el-form-item>
         <el-form-item label="小区名称" prop="community">
-          <el-input v-model="form.community" placeholder="请输入小区名称" />
+          <el-input v-model="form.community" placeholder="请输入小区名称"/>
         </el-form-item>
         <el-form-item label="小区地址" prop="address">
-          <el-input v-model="form.address" placeholder="请输入小区地址" />
+          <el-input v-model="form.address" placeholder="请输入小区地址"/>
         </el-form-item>
         <el-form-item label="所属区域" prop="area">
-          <el-input v-model="form.area" placeholder="请输入所属区域" />
+          <el-input v-model="form.area" placeholder="请输入所属区域"/>
         </el-form-item>
         <el-form-item label="城市" prop="city">
-          <el-input v-model="form.city" placeholder="请输入城市" />
+          <el-input v-model="form.city" placeholder="请输入城市"/>
         </el-form-item>
         <el-form-item label="镇" prop="town">
-          <el-input v-model="form.town" placeholder="请输入镇" />
+          <el-input v-model="form.town" placeholder="请输入镇"/>
         </el-form-item>
         <el-form-item label="总价" prop="totalPrice">
-          <el-input v-model="form.totalPrice" placeholder="请输入总价" />
+          <el-input v-model="form.totalPrice" placeholder="请输入总价"/>
         </el-form-item>
         <el-form-item label="单价" prop="unitPrice">
-          <el-input v-model="form.unitPrice" placeholder="请输入单价" />
+          <el-input v-model="form.unitPrice" placeholder="请输入单价"/>
         </el-form-item>
         <el-form-item label="户型" prop="houseType">
-          <el-input v-model="form.houseType" placeholder="请输入户型" />
+          <el-input v-model="form.houseType" placeholder="请输入户型"/>
         </el-form-item>
         <el-form-item label="建筑面积" prop="areaSize">
-          <el-input v-model="form.areaSize" placeholder="请输入建筑面积" />
+          <el-input v-model="form.areaSize" placeholder="请输入建筑面积"/>
         </el-form-item>
         <el-form-item label="朝向" prop="orientation">
-          <el-input v-model="form.orientation" placeholder="请输入朝向" />
+          <el-input v-model="form.orientation" placeholder="请输入朝向"/>
         </el-form-item>
         <el-form-item label="楼层" prop="floor">
-          <el-input v-model="form.floor" placeholder="请输入楼层" />
+          <el-input v-model="form.floor" placeholder="请输入楼层"/>
         </el-form-item>
         <el-form-item label="楼层高度" prop="floorHeight">
-          <el-input v-model="form.floorHeight" placeholder="请输入楼层高度" />
+          <el-input v-model="form.floorHeight" placeholder="请输入楼层高度"/>
         </el-form-item>
         <el-form-item label="装修面积单价" prop="decorationArea">
-          <el-input v-model="form.decorationArea" placeholder="请输入装修面积单价" />
+          <el-input v-model="form.decorationArea" placeholder="请输入装修面积单价"/>
         </el-form-item>
         <el-form-item label="楼层类型" prop="floorType">
-          <el-input v-model="form.floorType" placeholder="请输入楼层类型" />
+          <el-input v-model="form.floorType" placeholder="请输入楼层类型"/>
         </el-form-item>
         <el-form-item label="建筑年代" prop="buildingYear">
-          <el-input v-model="form.buildingYear" placeholder="请输入建筑年代" />
+          <el-input v-model="form.buildingYear" placeholder="请输入建筑年代"/>
         </el-form-item>
         <el-form-item label="装修类型" prop="decorationType">
-          <el-input v-model="form.decorationType" placeholder="请输入装修类型" />
+          <el-input v-model="form.decorationType" placeholder="请输入装修类型"/>
         </el-form-item>
         <el-form-item label="房源标签" prop="tags">
-          <el-input v-model="form.tags" placeholder="请输入房源标签" />
+          <el-input v-model="form.tags" placeholder="请输入房源标签"/>
         </el-form-item>
         <el-form-item label="产权性质" prop="propertyRightType">
-          <el-input v-model="form.propertyRightType" placeholder="请输入产权性质" />
+          <el-input v-model="form.propertyRightType" placeholder="请输入产权性质"/>
         </el-form-item>
         <el-form-item label="产权年限" prop="propertyRightYear">
-          <el-input v-model="form.propertyRightYear" placeholder="请输入产权年限" />
+          <el-input v-model="form.propertyRightYear" placeholder="请输入产权年限"/>
         </el-form-item>
         <el-form-item label="房源介绍" prop="houseIntro">
-          <el-input v-model="form.houseIntro" placeholder="请输入房源介绍" />
+          <el-input v-model="form.houseIntro" placeholder="请输入房源介绍"/>
         </el-form-item>
         <el-form-item label="房源图片" prop="imageUrls">
-          <image-upload v-model="form.imageUrls"/>
+          <image-upload separator=";" v-model="form.imageUrls"/>
         </el-form-item>
         <el-form-item label="物业类型" prop="propertyType">
-          <el-input v-model="form.propertyType" placeholder="请输入物业类型" />
+          <el-input v-model="form.propertyType" placeholder="请输入物业类型"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -350,7 +390,7 @@
         :limit="1"
         accept=".xlsx, .xls"
         :headers="upload.headers"
-        :action="upload.url + '?updateSupport=' + upload.updateSupport"
+        :action="upload.url"
         :disabled="upload.isUploading"
         :on-progress="handleFileUploadProgress"
         :on-success="handleFileSuccess"
@@ -360,11 +400,10 @@
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
         <div class="el-upload__tip text-center" slot="tip">
-          <div class="el-upload__tip" slot="tip">
-            <el-checkbox v-model="upload.updateSupport" /> 是否更新已经存在的房源信息数据
-          </div>
           <span>仅允许导入xls、xlsx格式文件。</span>
-          <el-link type="primary" :underline="false" style="font-size:12px;vertical-align: baseline;" @click="importTemplate">下载模板</el-link>
+          <el-link type="primary" :underline="false" style="font-size:12px;vertical-align: baseline;"
+                   @click="importTemplate">下载模板
+          </el-link>
         </div>
       </el-upload>
       <div slot="footer" class="dialog-footer">
@@ -378,8 +417,8 @@
 <script>
 
 
-import { listHouse, getHouse, delHouse, addHouse, updateHouse } from "@/api/house/house";
-import { getToken } from "@/utils/auth";
+import {addHouse, delHouse, getHouse, listHouse, updateHouse} from "@/api/house/house";
+import {getToken} from "@/utils/auth";
 
 export default {
   name: "House",
@@ -401,32 +440,32 @@ export default {
       houseList: [],
       // 表格列信息
       columns: [
-        { key: 0, label: '房源编号', visible: true },
-        { key: 1, label: '房源编码', visible: true },
-        { key: 2, label: '封面图片', visible: true },
-        { key: 3, label: '房源标题', visible: true },
-        { key: 4, label: '小区名称', visible: true },
-        { key: 5, label: '小区地址', visible: true },
-        { key: 6, label: '所属区域', visible: true },
-        { key: 7, label: '城市', visible: true },
-        { key: 8, label: '镇', visible: true },
-        { key: 9, label: '总价', visible: true },
-        { key: 10, label: '单价', visible: true },
-        { key: 11, label: '户型', visible: true },
-        { key: 12, label: '建筑面积', visible: true },
-        { key: 13, label: '朝向', visible: true },
-        { key: 14, label: '楼层', visible: true },
-        { key: 15, label: '楼层高度', visible: true },
-        { key: 16, label: '装修面积单价', visible: true },
-        { key: 17, label: '楼层类型', visible: true },
-        { key: 18, label: '建筑年代', visible: true },
-        { key: 19, label: '装修类型', visible: true },
-        { key: 20, label: '房源标签', visible: true },
-        { key: 21, label: '产权性质', visible: true },
-        { key: 22, label: '产权年限', visible: true },
-        { key: 23, label: '房源介绍', visible: true },
-        { key: 24, label: '房源图片', visible: true },
-        { key: 25, label: '物业类型', visible: true }
+        {key: 0, label: '房源编号', visible: false},
+        {key: 1, label: '房源编码', visible: false},
+        {key: 2, label: '封面图片', visible: true},
+        {key: 3, label: '房源标题', visible: true},
+        {key: 4, label: '小区名称', visible: true},
+        {key: 5, label: '小区地址', visible: false},
+        {key: 6, label: '所属区域', visible: true},
+        {key: 7, label: '城市', visible: false},
+        {key: 8, label: '镇', visible: false},
+        {key: 9, label: '总价', visible: true},
+        {key: 10, label: '单价', visible: true},
+        {key: 11, label: '户型', visible: true},
+        {key: 12, label: '建筑面积', visible: true},
+        {key: 13, label: '朝向', visible: true},
+        {key: 14, label: '楼层', visible: true},
+        {key: 15, label: '楼层高度', visible: false},
+        {key: 16, label: '装修面积单价', visible: false},
+        {key: 17, label: '楼层类型', visible: false},
+        {key: 18, label: '建筑年代', visible: true},
+        {key: 19, label: '装修类型', visible: true},
+        {key: 20, label: '房源标签', visible: true},
+        {key: 21, label: '产权性质', visible: true},
+        {key: 22, label: '产权年限', visible: true},
+        {key: 23, label: '房源介绍', visible: false},
+        {key: 24, label: '房源图片', visible: false},
+        {key: 25, label: '物业类型', visible: true}
       ],
       // 弹出层标题
       title: "",
@@ -463,20 +502,18 @@ export default {
         title: "",
         // 是否禁用上传
         isUploading: false,
-        // 是否更新已经存在的房源信息数据
-        updateSupport: 0,
         // 设置上传的请求头部
-        headers: { Authorization: "Bearer " + getToken() },
+        headers: {Authorization: "Bearer " + getToken()},
         // 上传的地址
         url: process.env.VUE_APP_BASE_API + "/house/house/importData"
       },
       // 表单校验
       rules: {
         hoseId: [
-          { required: true, message: "房源编号不能为空", trigger: "blur" }
+          {required: true, message: "房源编号不能为空", trigger: "blur"}
         ],
         houseCode: [
-          { required: true, message: "房源编码不能为空", trigger: "blur" }
+          {required: true, message: "房源编码不能为空", trigger: "blur"}
         ]
       }
     };
@@ -544,7 +581,7 @@ export default {
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.hoseId)
-      this.single = selection.length!==1
+      this.single = selection.length !== 1
       this.multiple = !selection.length
     },
     /** 新增按钮操作 */
@@ -587,12 +624,13 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const houseIds = row.hoseId || this.ids;
-      this.$modal.confirm('是否确认删除房源信息编号为"' + houseIds + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除房源信息编号为"' + houseIds + '"的数据项？').then(function () {
         return delHouse(houseIds);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+      }).catch(() => {
+      });
     },
     /** 导出按钮操作 */
     handleExport() {
@@ -622,12 +660,12 @@ export default {
       this.upload.open = false;
       this.upload.isUploading = false;
       this.$refs.upload.clearFiles();
-      this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", { dangerouslyUseHTMLString: true });
+      this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", {dangerouslyUseHTMLString: true});
       this.$modal.closeLoading()
       this.getList();
     },
     buildSubmitData() {
-      const data = { ...this.form };
+      const data = {...this.form};
       if (data.totalPrice !== null && data.totalPrice !== undefined && data.totalPrice !== "") {
         data.totalPrice = parseFloat(data.totalPrice);
       } else {
