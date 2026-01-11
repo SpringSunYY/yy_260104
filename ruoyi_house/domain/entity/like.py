@@ -40,8 +40,7 @@ class Like(BaseEntity):
     ]
     # 房源编号
     house_id: Annotated[
-        Optional[int],
-        BeforeValidator(str_to_int),
+        Optional[str],
         Field(default=None, description="房源编号"),
         ExcelField(name="房源编号")
     ]

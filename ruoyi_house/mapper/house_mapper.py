@@ -97,9 +97,9 @@ class HouseMapper:
             print(f"查询房源信息列表出错: {e}")
             return []
 
-    
+
     @classmethod
-    def select_house_by_id(cls, hose_id: int) -> Optional[House]:
+    def select_house_by_id(cls, hose_id: str) -> Optional[House]:
         """
         根据ID查询房源信息
 
@@ -115,7 +115,7 @@ class HouseMapper:
         except Exception as e:
             print(f"根据ID查询房源信息出错: {e}")
             return None
-    
+
 
     @classmethod
     def insert_house(cls, house: House) -> int:
@@ -166,7 +166,7 @@ class HouseMapper:
             print(f"新增房源信息出错: {e}")
             return 0
 
-    
+
     @classmethod
     def update_house(cls, house: House) -> int:
         """
@@ -179,7 +179,7 @@ class HouseMapper:
             int: 更新的记录数
         """
         try:
-            
+
             existing = db.session.get(HousePo, house.hose_id)
             if not existing:
                 return 0
@@ -212,7 +212,7 @@ class HouseMapper:
             existing.property_type = house.property_type
             db.session.commit()
             return 1
-            
+
         except Exception as e:
             db.session.rollback()
             print(f"修改房源信息出错: {e}")
@@ -238,4 +238,3 @@ class HouseMapper:
             db.session.rollback()
             print(f"批量删除房源信息出错: {e}")
             return 0
-    

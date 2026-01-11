@@ -260,6 +260,7 @@ export default {
 
       getHouseDetail(this.hoseId).then(response => {
         this.houseData = response.data;
+        this.isLiked = response.data.isLiked;
         // 处理图片列表
         this.processImages();
         this.loading = false;

@@ -6,13 +6,20 @@
 import re
 from typing import List, Optional
 
+from werkzeug.datastructures.structures import V
+
 from ruoyi_common.exception import ServiceException
+from ruoyi_common.utils import DateUtil
 from ruoyi_common.utils.base import LogUtil
-from ruoyi_house.domain.entity import House
+from ruoyi_common.utils.security_util import get_user_id, get_username
+from ruoyi_house.domain.entity import House, View
+from ruoyi_house.mapper import LikeMapper, ViewMapper
 from ruoyi_house.mapper.house_mapper import HouseMapper
+
 
 class HouseService:
     """房源信息服务类"""
+
     @classmethod
     def select_house_list(cls, house: House) -> List[House]:
         """
@@ -25,7 +32,6 @@ class HouseService:
             List[house]: 房源信息列表
         """
         return HouseMapper.select_house_list(house)
-
 
     @classmethod
     def select_house_by_id(cls, hose_id: int) -> Optional[House]:
@@ -41,6 +47,46 @@ class HouseService:
         return HouseMapper.select_house_by_id(hose_id)
 
     @classmethod
+    def select_house_detail_by_id(cls, hose_id: str) -> Optional[House]:
+        """
+        查询房源信息详情
+
+        Args:
+            hose_id (int): 房源编号
+
+        Returns:
+            house: 房源信息对象
+        """
+        house = HouseMapper.select_house_by_id(hose_id)
+        if house is None:
+            raise ServiceException(f"没有查询到房源信息【{hose_id}】")
+
+        # 查询用户有没有点赞
+        user_id = get_user_id()
+        like = LikeMapper.select_like_by_house_id_and_user_id(hose_id, user_id)
+        if like is not None:
+            house.is_liked = True
+        else:
+            house.is_liked = False
+        # 查询用户今天是否浏览，如果没有需要添加浏览记录
+        nowStr = DateUtil.get_date_now()
+        view = ViewMapper.select_view_by_house_user_and_date(hose_id, user_id, nowStr)
+        if view is None:
+            view = View()
+            view.house_id = house.hose_id
+            view.user_id = user_id
+            view.user_name = get_username()
+            view.house_title = house.title
+            view.cover_image = house.cover_image
+            view.house_type = house.house_type
+            view.town = house.town
+            view.tags = house.tags
+            view.orientation = house.orientation
+            view.score = 1
+            ViewMapper.insert_view(view)
+        return house
+
+    @classmethod
     def insert_house(cls, house: House) -> int:
         """
         新增房源信息
@@ -51,12 +97,11 @@ class HouseService:
         Returns:
             int: 插入的记录数
         """
-        #首先判断是否已存在
+        # 首先判断是否已存在
         existing = HouseMapper.select_house_by_id(house.hose_id)
         if existing is not None:
             raise ServiceException(f"房源信息【{house.hose_id}】已存在")
         return HouseMapper.insert_house(house)
-
 
     @classmethod
     def update_house(cls, house: House) -> int:
@@ -70,8 +115,6 @@ class HouseService:
             int: 更新的记录数
         """
         return HouseMapper.update_house(house)
-
-
 
     @classmethod
     def delete_house_by_ids(cls, ids: List[int]) -> int:
@@ -114,16 +157,16 @@ class HouseService:
 
                 # 检查关键字段是否为空，如果任何一个为空则跳过
                 key_fields = [
-                    house.hose_id,      # 房源编号
-                    house.house_code,   # 房源编码
-                    house.title,        # 房源标题
-                    house.community,    # 小区名称
-                    house.address,      # 小区地址
-                    house.area,         # 所属区域
-                    house.house_type,   # 户型
-                    house.area_size,    # 建筑面积
+                    house.hose_id,  # 房源编号
+                    house.house_code,  # 房源编码
+                    house.title,  # 房源标题
+                    house.community,  # 小区名称
+                    house.address,  # 小区地址
+                    house.area,  # 所属区域
+                    house.house_type,  # 户型
+                    house.area_size,  # 建筑面积
                     house.orientation,  # 朝向
-                    house.floor         # 楼层
+                    house.floor  # 楼层
                 ]
 
                 if any(field is None or (isinstance(field, str) and field.strip() == "") for field in key_fields):
@@ -173,7 +216,6 @@ class HouseService:
 
         success_msg = f"恭喜您，数据已全部导入成功！{result_msg}，数据如下：" + success_msg
         return success_msg
-
 
     @staticmethod
     def _clean_dongguan_town(town_name: str) -> str:

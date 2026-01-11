@@ -13,6 +13,7 @@ from ruoyi_admin.ext import db
 from ruoyi_house.domain.entity import Like
 from ruoyi_house.domain.po import LikePo
 
+
 class LikeMapper:
     """用户点赞Mapper"""
 
@@ -31,22 +32,14 @@ class LikeMapper:
             # 构建查询条件
             stmt = select(LikePo)
 
-
             if like.id is not None:
                 stmt = stmt.where(LikePo.id == like.id)
-
 
             if like.user_name:
                 stmt = stmt.where(LikePo.user_name.like("%" + str(like.user_name) + "%"))
 
-
             if like.house_title:
                 stmt = stmt.where(LikePo.house_title.like("%" + str(like.house_title) + "%"))
-
-
-
-
-
 
             if like.score is not None:
                 stmt = stmt.where(LikePo.score == like.score)
@@ -66,7 +59,6 @@ class LikeMapper:
             print(f"查询用户点赞列表出错: {e}")
             return []
 
-    
     @classmethod
     def select_like_by_id(cls, id: int) -> Optional[Like]:
         """
@@ -84,7 +76,6 @@ class LikeMapper:
         except Exception as e:
             print(f"根据ID查询用户点赞出错: {e}")
             return None
-    
 
     @classmethod
     def insert_like(cls, like: Like) -> int:
@@ -121,7 +112,6 @@ class LikeMapper:
             print(f"新增用户点赞出错: {e}")
             return 0
 
-    
     @classmethod
     def update_like(cls, like: Like) -> int:
         """
@@ -134,7 +124,7 @@ class LikeMapper:
             int: 更新的记录数
         """
         try:
-            
+
             existing = db.session.get(LikePo, like.id)
             if not existing:
                 return 0
@@ -153,7 +143,7 @@ class LikeMapper:
             existing.create_time = like.create_time
             db.session.commit()
             return 1
-            
+
         except Exception as e:
             db.session.rollback()
             print(f"修改用户点赞出错: {e}")
@@ -179,4 +169,25 @@ class LikeMapper:
             db.session.rollback()
             print(f"批量删除用户点赞出错: {e}")
             return 0
-    
+
+    @classmethod
+    def select_like_by_house_id_and_user_id(cls, house_id, user_id) -> Optional[Like]:
+        """
+        根据 house_id 和 user_id 查询用户点赞
+
+        Args:
+            hose_id (int): 房源ID
+            user_id (int): 用户ID
+
+        Returns:
+            like: 用户点赞对象
+        """
+        try:
+            result = db.session.execute(
+                select(LikePo).where(LikePo.house_id == house_id, LikePo.user_id == user_id)
+            ).scalars().first()
+            return Like.model_validate(result) if result else None
+        except Exception as e:
+            print(f"根据 house_id 和 user_id 查询用户点赞出错: {e}")
+            return None
+        pass

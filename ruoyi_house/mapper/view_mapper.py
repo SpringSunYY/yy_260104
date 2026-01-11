@@ -8,10 +8,12 @@ from datetime import datetime
 
 from flask import g
 from sqlalchemy import select, update, delete
+from sqlalchemy.sql.functions import func
 
 from ruoyi_admin.ext import db
 from ruoyi_house.domain.entity import View
 from ruoyi_house.domain.po import ViewPo
+
 
 class ViewMapper:
     """用户浏览Mapper"""
@@ -31,22 +33,14 @@ class ViewMapper:
             # 构建查询条件
             stmt = select(ViewPo)
 
-
             if view.id is not None:
                 stmt = stmt.where(ViewPo.id == view.id)
-
 
             if view.user_name:
                 stmt = stmt.where(ViewPo.user_name.like("%" + str(view.user_name) + "%"))
 
-
             if view.house_title:
                 stmt = stmt.where(ViewPo.house_title.like("%" + str(view.house_title) + "%"))
-
-
-
-
-
 
             if view.score is not None:
                 stmt = stmt.where(ViewPo.score == view.score)
@@ -66,7 +60,6 @@ class ViewMapper:
             print(f"查询用户浏览列表出错: {e}")
             return []
 
-    
     @classmethod
     def select_view_by_id(cls, id: int) -> Optional[View]:
         """
@@ -84,7 +77,6 @@ class ViewMapper:
         except Exception as e:
             print(f"根据ID查询用户浏览出错: {e}")
             return None
-    
 
     @classmethod
     def insert_view(cls, view: View) -> int:
@@ -121,7 +113,6 @@ class ViewMapper:
             print(f"新增用户浏览出错: {e}")
             return 0
 
-    
     @classmethod
     def update_view(cls, view: View) -> int:
         """
@@ -134,7 +125,7 @@ class ViewMapper:
             int: 更新的记录数
         """
         try:
-            
+
             existing = db.session.get(ViewPo, view.id)
             if not existing:
                 return 0
@@ -153,7 +144,7 @@ class ViewMapper:
             existing.create_time = view.create_time
             db.session.commit()
             return 1
-            
+
         except Exception as e:
             db.session.rollback()
             print(f"修改用户浏览出错: {e}")
@@ -179,4 +170,31 @@ class ViewMapper:
             db.session.rollback()
             print(f"批量删除用户浏览出错: {e}")
             return 0
-    
+
+    @classmethod
+    def select_view_by_house_user_and_date(cls, house_id: str, user_id: int, target_date: str) -> Optional[View]:
+        """
+        根据 house_id 和 user_id、时间 查询用户浏览，时间格式化为年月日
+
+        Args:
+            house_id (int): 房源编号
+            user_id (int): 用户编号
+            target_date (str): 日期时间对象
+
+        Returns:
+            view: 用户浏览对象
+        """
+        try:
+            # 提取创建时间的日期部分并与传入日期的日期部分比较
+            stmt = select(ViewPo).where(
+                ViewPo.house_id == house_id,
+                ViewPo.user_id == user_id,
+                func.DATE(ViewPo.create_time) == target_date
+            )
+
+            result = db.session.execute(stmt).scalars().first()
+            return View.model_validate(result) if result else None
+        except Exception as e:
+            print(f"根据房源ID、用户ID和时间查询用户浏览出错: {e}")
+            return None
+

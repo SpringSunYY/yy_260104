@@ -66,14 +66,14 @@ class House(BaseEntity):
         Optional[str],
         Field(default=None, description="城市"),
         VoField(query=True),
-        ExcelField(name="城市",action='export')
+        ExcelField(name="城市", action='export')
     ]
     # 镇
     town: Annotated[
         Optional[str],
         Field(default=None, description="镇"),
         VoField(query=True),
-        ExcelField(name="镇",action='export')
+        ExcelField(name="镇", action='export')
     ]
     # 总价
     total_price: Annotated[
@@ -122,7 +122,7 @@ class House(BaseEntity):
         BeforeValidator(str_to_int),
         Field(default=None, description="楼层高度"),
         VoField(query=True),
-        ExcelField(name="楼层高度",action='export')
+        ExcelField(name="楼层高度", action='export')
     ]
     # 装修面积单价
     decoration_area: Annotated[
@@ -136,7 +136,7 @@ class House(BaseEntity):
         Optional[str],
         Field(default=None, description="楼层类型"),
         VoField(query=True),
-        ExcelField(name="楼层类型",action='export')
+        ExcelField(name="楼层类型", action='export')
     ]
     # 建筑年代
     building_year: Annotated[
@@ -192,6 +192,11 @@ class House(BaseEntity):
         Field(default=None, description="物业类型"),
         VoField(query=True),
         ExcelField(name="物业类型")
+    ]
+
+    is_liked: Annotated[
+        Optional[bool],
+        Field(default=None, description="是否点赞")
     ]
 
     # 页码
