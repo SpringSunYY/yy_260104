@@ -54,12 +54,14 @@
         </el-select>
       </el-form-item>
       <el-form-item label="户型" prop="houseType">
-        <el-input
-          v-model="queryParams.houseType"
-          placeholder="请输入户型"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.houseType" placeholder="请选择户型" clearable>
+          <el-option
+            v-for="dict in dict.type.house_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="朝向" prop="orientation">
         <el-select v-model="queryParams.orientation" placeholder="请选择朝向" clearable>
@@ -244,8 +246,11 @@
                        prop="totalPrice"/>
       <el-table-column label="单价" align="center" :show-overflow-tooltip="true" v-if="columns[10].visible"
                        prop="unitPrice"/>
-      <el-table-column label="户型" align="center" :show-overflow-tooltip="true" v-if="columns[11].visible"
-                       prop="houseType"/>
+      <el-table-column label="户型" align="center" v-if="columns[11].visible" prop="houseType">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.house_type" :value="scope.row.houseType"/>
+        </template>
+      </el-table-column>
       <el-table-column label="建筑面积" align="center" :show-overflow-tooltip="true" v-if="columns[12].visible"
                        prop="areaSize"/>
       <el-table-column label="朝向" align="center" v-if="columns[13].visible" prop="orientation">
@@ -388,7 +393,14 @@
           <el-input-number :precision="2" v-model="form.unitPrice" placeholder="请输入单价"/>
         </el-form-item>
         <el-form-item label="户型" prop="houseType">
-          <el-input v-model="form.houseType" placeholder="请输入户型"/>
+          <el-select v-model="form.houseType" placeholder="请选择户型">
+            <el-option
+              v-for="dict in dict.type.house_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="建筑面积" prop="areaSize">
           <el-input-number :precision="2" v-model="form.areaSize" placeholder="请输入建筑面积"/>
@@ -520,7 +532,7 @@ import {getToken} from "@/utils/auth";
 
 export default {
   name: "House",
-  dicts: ['house_city', 'house_town', 'house_orientation', 'house_floor_type', 'house_decoration_type', 'house_property_right_type', 'house_property_type', 'house_property_right_year'],
+  dicts: ['house_city', 'house_town', 'house_orientation', 'house_floor_type', 'house_decoration_type', 'house_property_right_type', 'house_property_type', 'house_property_right_year', 'house_type'],
   data() {
     return {
       //是否是更新
