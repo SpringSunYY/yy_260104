@@ -34,20 +34,24 @@
         />
       </el-form-item>
       <el-form-item label="城市" prop="city">
-        <el-input
-          v-model="queryParams.city"
-          placeholder="请输入城市"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.city" placeholder="请选择城市" clearable>
+          <el-option
+            v-for="dict in dict.type.house_city"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="镇" prop="town">
-        <el-input
-          v-model="queryParams.town"
-          placeholder="请输入镇"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.town" placeholder="请选择镇" clearable>
+          <el-option
+            v-for="dict in dict.type.house_town"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="户型" prop="houseType">
         <el-input
@@ -58,12 +62,14 @@
         />
       </el-form-item>
       <el-form-item label="朝向" prop="orientation">
-        <el-input
-          v-model="queryParams.orientation"
-          placeholder="请输入朝向"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.orientation" placeholder="请选择朝向" clearable>
+          <el-option
+            v-for="dict in dict.type.house_orientation"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="楼层高度" prop="floorHeight">
         <el-input
@@ -74,12 +80,14 @@
         />
       </el-form-item>
       <el-form-item label="楼层类型" prop="floorType">
-        <el-input
-          v-model="queryParams.floorType"
-          placeholder="请输入楼层类型"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.floorType" placeholder="请选择楼层类型" clearable>
+          <el-option
+            v-for="dict in dict.type.house_floor_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="建筑年代" prop="buildingYear">
         <el-input
@@ -90,12 +98,14 @@
         />
       </el-form-item>
       <el-form-item label="装修类型" prop="decorationType">
-        <el-input
-          v-model="queryParams.decorationType"
-          placeholder="请输入装修类型"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.decorationType" placeholder="请选择装修类型" clearable>
+          <el-option
+            v-for="dict in dict.type.house_decoration_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="房源标签" prop="tags">
         <el-input
@@ -106,28 +116,34 @@
         />
       </el-form-item>
       <el-form-item label="产权性质" prop="propertyRightType">
-        <el-input
-          v-model="queryParams.propertyRightType"
-          placeholder="请输入产权性质"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.propertyRightType" placeholder="请选择产权性质" clearable>
+          <el-option
+            v-for="dict in dict.type.house_property_right_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="产权年限" prop="propertyRightYear">
-        <el-input
-          v-model="queryParams.propertyRightYear"
-          placeholder="请输入产权年限"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.propertyRightYear" placeholder="请选择产权年限" clearable>
+          <el-option
+            v-for="dict in dict.type.house_property_right_year"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="物业类型" prop="propertyType">
-        <el-input
-          v-model="queryParams.propertyType"
-          placeholder="请输入物业类型"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.propertyType" placeholder="请选择物业类型" clearable>
+          <el-option
+            v-for="dict in dict.type.house_property_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -214,8 +230,16 @@
                        prop="address"/>
       <el-table-column label="所属区域" align="center" :show-overflow-tooltip="true" v-if="columns[6].visible"
                        prop="area"/>
-      <el-table-column label="城市" align="center" :show-overflow-tooltip="true" v-if="columns[7].visible" prop="city"/>
-      <el-table-column label="镇" align="center" :show-overflow-tooltip="true" v-if="columns[8].visible" prop="town"/>
+      <el-table-column label="城市" align="center" v-if="columns[7].visible" prop="city">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.house_city" :value="scope.row.city"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="镇" align="center" v-if="columns[8].visible" prop="town">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.house_town" :value="scope.row.town"/>
+        </template>
+      </el-table-column>
       <el-table-column label="总价" align="center" :show-overflow-tooltip="true" v-if="columns[9].visible"
                        prop="totalPrice"/>
       <el-table-column label="单价" align="center" :show-overflow-tooltip="true" v-if="columns[10].visible"
@@ -224,20 +248,29 @@
                        prop="houseType"/>
       <el-table-column label="建筑面积" align="center" :show-overflow-tooltip="true" v-if="columns[12].visible"
                        prop="areaSize"/>
-      <el-table-column label="朝向" align="center" :show-overflow-tooltip="true" v-if="columns[13].visible"
-                       prop="orientation"/>
+      <el-table-column label="朝向" align="center" v-if="columns[13].visible" prop="orientation">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.house_orientation" :value="scope.row.orientation"/>
+        </template>
+      </el-table-column>
       <el-table-column label="楼层" align="center" :show-overflow-tooltip="true" v-if="columns[14].visible"
                        prop="floor"/>
       <el-table-column label="楼层高度" align="center" :show-overflow-tooltip="true" v-if="columns[15].visible"
                        prop="floorHeight"/>
       <el-table-column label="装修面积单价" align="center" :show-overflow-tooltip="true" v-if="columns[16].visible"
                        prop="decorationArea"/>
-      <el-table-column label="楼层类型" align="center" :show-overflow-tooltip="true" v-if="columns[17].visible"
-                       prop="floorType"/>
+      <el-table-column label="楼层类型" align="center" v-if="columns[17].visible" prop="floorType">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.house_floor_type" :value="scope.row.floorType"/>
+        </template>
+      </el-table-column>
       <el-table-column label="建筑年代" align="center" :show-overflow-tooltip="true" v-if="columns[18].visible"
                        prop="buildingYear"/>
-      <el-table-column label="装修类型" align="center" :show-overflow-tooltip="true" v-if="columns[19].visible"
-                       prop="decorationType"/>
+      <el-table-column label="装修类型" align="center" v-if="columns[19].visible" prop="decorationType">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.house_decoration_type" :value="scope.row.decorationType"/>
+        </template>
+      </el-table-column>
       <el-table-column label="房源标签" align="center" :show-overflow-tooltip="true" v-if="columns[20].visible"
                        prop="tags">
         <template slot-scope="scope">
@@ -252,10 +285,16 @@
           <span v-else>无</span>
         </template>
       </el-table-column>
-      <el-table-column label="产权性质" align="center" :show-overflow-tooltip="true" v-if="columns[21].visible"
-                       prop="propertyRightType"/>
-      <el-table-column label="产权年限" align="center" :show-overflow-tooltip="true" v-if="columns[22].visible"
-                       prop="propertyRightYear"/>
+      <el-table-column label="产权性质" align="center" v-if="columns[21].visible" prop="propertyRightType">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.house_property_right_type" :value="scope.row.propertyRightType"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="产权年限" align="center" v-if="columns[22].visible" prop="propertyRightYear">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.house_property_right_year" :value="scope.row.propertyRightYear"/>
+        </template>
+      </el-table-column>
       <el-table-column label="房源介绍" align="center" :show-overflow-tooltip="true" v-if="columns[23].visible"
                        prop="houseIntro"/>
       <el-table-column label="房源图片" align="center" v-if="columns[24].visible" prop="imageUrls" width="100">
@@ -263,8 +302,11 @@
           <image-preview separator=";" :src="scope.row.imageUrls" :width="50" :height="50"/>
         </template>
       </el-table-column>
-      <el-table-column label="物业类型" align="center" :show-overflow-tooltip="true" v-if="columns[25].visible"
-                       prop="propertyType"/>
+      <el-table-column label="物业类型" align="center" v-if="columns[25].visible" prop="propertyType">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.house_property_type" :value="scope.row.propertyType"/>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -305,7 +347,7 @@
           <el-input v-model="form.houseCode" placeholder="请输入房源编码"/>
         </el-form-item>
         <el-form-item label="封面图片" prop="coverImage">
-          <image-upload separator=";" v-model="form.coverImage"/>
+          <image-upload separator=";" :limit="1" v-model="form.coverImage"/>
         </el-form-item>
         <el-form-item label="房源标题" prop="title">
           <el-input v-model="form.title" placeholder="请输入房源标题"/>
@@ -320,10 +362,24 @@
           <el-input v-model="form.area" placeholder="请输入所属区域"/>
         </el-form-item>
         <el-form-item label="城市" prop="city">
-          <el-input v-model="form.city" placeholder="请输入城市"/>
+          <el-select v-model="form.city" placeholder="请选择城市">
+            <el-option
+              v-for="dict in dict.type.house_city"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="镇" prop="town">
-          <el-input v-model="form.town" placeholder="请输入镇"/>
+          <el-select v-model="form.town" placeholder="请选择镇">
+            <el-option
+              v-for="dict in dict.type.house_town"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="总价" prop="totalPrice">
           <el-input v-model="form.totalPrice" placeholder="请输入总价"/>
@@ -338,7 +394,14 @@
           <el-input v-model="form.areaSize" placeholder="请输入建筑面积"/>
         </el-form-item>
         <el-form-item label="朝向" prop="orientation">
-          <el-input v-model="form.orientation" placeholder="请输入朝向"/>
+          <el-select v-model="form.orientation" placeholder="请选择朝向">
+            <el-option
+              v-for="dict in dict.type.house_orientation"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="楼层" prop="floor">
           <el-input v-model="form.floor" placeholder="请输入楼层"/>
@@ -346,26 +409,54 @@
         <el-form-item label="楼层高度" prop="floorHeight">
           <el-input v-model="form.floorHeight" placeholder="请输入楼层高度"/>
         </el-form-item>
-        <el-form-item label="装修面积单价" prop="decorationArea">
+        <el-form-item label="面积单价" prop="decorationArea">
           <el-input v-model="form.decorationArea" placeholder="请输入装修面积单价"/>
         </el-form-item>
         <el-form-item label="楼层类型" prop="floorType">
-          <el-input v-model="form.floorType" placeholder="请输入楼层类型"/>
+          <el-select v-model="form.floorType" placeholder="请选择楼层类型">
+            <el-option
+              v-for="dict in dict.type.house_floor_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="建筑年代" prop="buildingYear">
           <el-input v-model="form.buildingYear" placeholder="请输入建筑年代"/>
         </el-form-item>
         <el-form-item label="装修类型" prop="decorationType">
-          <el-input v-model="form.decorationType" placeholder="请输入装修类型"/>
+          <el-select v-model="form.decorationType" placeholder="请选择装修类型">
+            <el-option
+              v-for="dict in dict.type.house_decoration_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="房源标签" prop="tags">
           <el-input v-model="form.tags" placeholder="请输入房源标签"/>
         </el-form-item>
         <el-form-item label="产权性质" prop="propertyRightType">
-          <el-input v-model="form.propertyRightType" placeholder="请输入产权性质"/>
+          <el-select v-model="form.propertyRightType" placeholder="请选择产权性质">
+            <el-option
+              v-for="dict in dict.type.house_property_right_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="产权年限" prop="propertyRightYear">
-          <el-input v-model="form.propertyRightYear" placeholder="请输入产权年限"/>
+          <el-select v-model="form.propertyRightYear" placeholder="请选择产权年限">
+            <el-option
+              v-for="dict in dict.type.house_property_right_year"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="房源介绍" prop="houseIntro">
           <el-input v-model="form.houseIntro" placeholder="请输入房源介绍"/>
@@ -374,7 +465,14 @@
           <image-upload separator=";" v-model="form.imageUrls"/>
         </el-form-item>
         <el-form-item label="物业类型" prop="propertyType">
-          <el-input v-model="form.propertyType" placeholder="请输入物业类型"/>
+          <el-select v-model="form.propertyType" placeholder="请选择物业类型">
+            <el-option
+              v-for="dict in dict.type.house_property_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -422,6 +520,7 @@ import {getToken} from "@/utils/auth";
 
 export default {
   name: "House",
+  dicts: ['house_city', 'house_town', 'house_orientation', 'house_floor_type', 'house_decoration_type', 'house_property_right_type', 'house_property_type', 'house_property_right_year'],
   data() {
     return {
       // 遮罩层
