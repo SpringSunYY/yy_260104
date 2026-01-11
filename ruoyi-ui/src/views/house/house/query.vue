@@ -192,7 +192,10 @@
             <div class="house-info-section">
               <!-- 标题 -->
               <div class="title-section">
-                <h3 class="house-title">{{ house.title }}</h3>
+                <router-link
+                  :to="'/house/detail/index/' + house.hoseId" class="house-title">
+                  {{ house.title }}
+                </router-link>
               </div>
 
               <!-- 地址信息 -->
@@ -208,7 +211,7 @@
                 <div class="spec-item">
                   <div class="spec-label">户型</div>
                   <div class="spec-value">
-                    <dict-tag :options="dict.type.house_type" :value="house.houseType" />
+                    <dict-tag :options="dict.type.house_type" :value="house.houseType"/>
                   </div>
                 </div>
                 <div class="spec-item">
@@ -218,7 +221,7 @@
                 <div class="spec-item">
                   <div class="spec-label">朝向</div>
                   <div class="spec-value">
-                    <dict-tag :options="dict.type.house_orientation" :value="house.orientation" />
+                    <dict-tag :options="dict.type.house_orientation" :value="house.orientation"/>
                   </div>
                 </div>
                 <div class="spec-item">
@@ -228,7 +231,7 @@
                 <div class="spec-item">
                   <div class="spec-label">装修</div>
                   <div class="spec-value">
-                    <dict-tag :options="dict.type.house_decoration_type" :value="house.decorationType" />
+                    <dict-tag :options="dict.type.house_decoration_type" :value="house.decorationType"/>
                   </div>
                 </div>
                 <div class="spec-item">
@@ -238,13 +241,13 @@
                 <div class="spec-item">
                   <div class="spec-label">产权</div>
                   <div class="spec-value">
-                    <dict-tag :options="dict.type.house_property_right_type" :value="house.propertyRightType" />
+                    <dict-tag :options="dict.type.house_property_right_type" :value="house.propertyRightType"/>
                   </div>
                 </div>
                 <div class="spec-item">
                   <div class="spec-label">物业</div>
                   <div class="spec-value">
-                    <dict-tag :options="dict.type.house_property_type" :value="house.propertyType" />
+                    <dict-tag :options="dict.type.house_property_type" :value="house.propertyType"/>
                   </div>
                 </div>
               </div>
@@ -260,7 +263,7 @@
           <!-- 加载状态 -->
           <div v-if="loading && houseList.length > 0" class="loading-more">
             <el-icon class="is-loading">
-              <Loading />
+              <Loading/>
             </el-icon>
             <span>正在加载更多...</span>
           </div>
@@ -286,7 +289,7 @@
 </template>
 
 <script>
-import { listHouse } from "@/api/house/house";
+import {listHouse} from "@/api/house/house";
 
 export default {
   name: "HouseQuery",
@@ -530,7 +533,7 @@ export default {
         }
       }
 
-      window.addEventListener('scroll', this.scrollListener, { passive: true })
+      window.addEventListener('scroll', this.scrollListener, {passive: true})
     },
 
     /** 处理标签 */
@@ -538,14 +541,6 @@ export default {
       if (!tagsStr) return [];
       return tagsStr.split(';').filter(tag => tag.trim() !== '');
     },
-
-
-    /** 截断文本 */
-    truncateText(text, maxLength) {
-      if (!text) return '';
-      if (text.length <= maxLength) return text;
-      return text.substring(0, maxLength) + '...';
-    }
   }
 };
 </script>
@@ -900,6 +895,7 @@ export default {
               line-clamp: 2;
               overflow: hidden;
               transition: color 0.3s ease;
+              cursor: pointer;
 
               &:hover {
                 color: #409eff;

@@ -93,6 +93,20 @@ export const constantRoutes = [
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
   {
+    path: '/house/detail',
+    component: Layout,
+    hidden: true,
+    permissions: ['house:house:query'],
+    children: [
+      {
+        path: 'index/:hoseId',
+        component: () => import('@/views/house/house/detail'),
+        name: 'HouseDetail',
+        meta: { title: '房源详情',activeMenu: '/house/house/query' }
+      }
+    ]
+  },
+  {
     path: '/system/user-auth',
     component: Layout,
     hidden: true,

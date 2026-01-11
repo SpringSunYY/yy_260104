@@ -21,6 +21,14 @@ export function getHouse(hoseId) {
   })
 }
 
+//查询房源详细信息
+export function getHouseDetail(hoseId) {
+  return request({
+    url: '/house/house/detail/' +hoseId,
+    method: 'get'
+  })
+}
+
 // 新增房源信息
 export function addHouse(data) {
   return request({
