@@ -341,7 +341,7 @@
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="房源编号" prop="hoseId">
-          <el-input v-model="form.hoseId" placeholder="请输入房源编号"/>
+          <el-input :readonly="isUpdate" v-model="form.hoseId" placeholder="请输入房源编号"/>
         </el-form-item>
         <el-form-item label="房源编码" prop="houseCode">
           <el-input v-model="form.houseCode" placeholder="请输入房源编码"/>
@@ -382,16 +382,16 @@
           </el-select>
         </el-form-item>
         <el-form-item label="总价" prop="totalPrice">
-          <el-input v-model="form.totalPrice" placeholder="请输入总价"/>
+          <el-input-number :precision="2" v-model="form.totalPrice" placeholder="请输入总价"/>
         </el-form-item>
         <el-form-item label="单价" prop="unitPrice">
-          <el-input v-model="form.unitPrice" placeholder="请输入单价"/>
+          <el-input-number :precision="2" v-model="form.unitPrice" placeholder="请输入单价"/>
         </el-form-item>
         <el-form-item label="户型" prop="houseType">
           <el-input v-model="form.houseType" placeholder="请输入户型"/>
         </el-form-item>
         <el-form-item label="建筑面积" prop="areaSize">
-          <el-input v-model="form.areaSize" placeholder="请输入建筑面积"/>
+          <el-input-number :precision="2" v-model="form.areaSize" placeholder="请输入建筑面积"/>
         </el-form-item>
         <el-form-item label="朝向" prop="orientation">
           <el-select v-model="form.orientation" placeholder="请选择朝向">
@@ -407,10 +407,10 @@
           <el-input v-model="form.floor" placeholder="请输入楼层"/>
         </el-form-item>
         <el-form-item label="楼层高度" prop="floorHeight">
-          <el-input v-model="form.floorHeight" placeholder="请输入楼层高度"/>
+          <el-input-number v-model="form.floorHeight" placeholder="请输入楼层高度"/>
         </el-form-item>
         <el-form-item label="面积单价" prop="decorationArea">
-          <el-input v-model="form.decorationArea" placeholder="请输入装修面积单价"/>
+          <el-input-number :precision="2" v-model="form.decorationArea" placeholder="请输入装修面积单价"/>
         </el-form-item>
         <el-form-item label="楼层类型" prop="floorType">
           <el-select v-model="form.floorType" placeholder="请选择楼层类型">
@@ -423,7 +423,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="建筑年代" prop="buildingYear">
-          <el-input v-model="form.buildingYear" placeholder="请输入建筑年代"/>
+          <el-input-number v-model="form.buildingYear" placeholder="请输入建筑年代"/>
         </el-form-item>
         <el-form-item label="装修类型" prop="decorationType">
           <el-select v-model="form.decorationType" placeholder="请选择装修类型">
@@ -523,6 +523,8 @@ export default {
   dicts: ['house_city', 'house_town', 'house_orientation', 'house_floor_type', 'house_decoration_type', 'house_property_right_type', 'house_property_type', 'house_property_right_year'],
   data() {
     return {
+      //是否是更新
+      isUpdate: false,
       // 遮罩层
       loading: true,
       // 选中数组
@@ -666,6 +668,7 @@ export default {
         propertyType: null
       };
       this.resetForm("form");
+      this.isUpdate = false;
     },
     /** 搜索按钮操作 */
     handleQuery() {
@@ -693,6 +696,7 @@ export default {
     handleUpdate(row) {
       this.reset();
       const hoseId = row.hoseId || this.ids
+      this.isUpdate = true;
       getHouse(hoseId).then(response => {
         this.form = response.data;
         this.open = true;
@@ -704,7 +708,7 @@ export default {
       this.$refs["form"].validate(valid => {
         if (valid) {
           const submitData = this.buildSubmitData();
-          if (submitData.hoseId != null) {
+          if (submitData.hoseId != null && this.isUpdate) {
             updateHouse(submitData).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;

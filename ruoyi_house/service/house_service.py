@@ -26,7 +26,7 @@ class HouseService:
         """
         return HouseMapper.select_house_list(house)
 
-    
+
     @classmethod
     def select_house_by_id(cls, hose_id: int) -> Optional[House]:
         """
@@ -39,7 +39,7 @@ class HouseService:
             house: 房源信息对象
         """
         return HouseMapper.select_house_by_id(hose_id)
-    
+
     @classmethod
     def insert_house(cls, house: House) -> int:
         """
@@ -51,9 +51,13 @@ class HouseService:
         Returns:
             int: 插入的记录数
         """
+        #首先判断是否已存在
+        existing = HouseMapper.select_house_by_id(house.hose_id)
+        if existing is not None:
+            raise ServiceException(f"房源信息【{house.hose_id}】已存在")
         return HouseMapper.insert_house(house)
 
-    
+
     @classmethod
     def update_house(cls, house: House) -> int:
         """
@@ -66,9 +70,9 @@ class HouseService:
             int: 更新的记录数
         """
         return HouseMapper.update_house(house)
-    
 
-    
+
+
     @classmethod
     def delete_house_by_ids(cls, ids: List[int]) -> int:
         """
@@ -81,7 +85,7 @@ class HouseService:
             int: 删除的记录数
         """
         return HouseMapper.delete_house_by_ids(ids)
-    
+
     @classmethod
     def import_house(cls, house_list: List[House], update_support: bool = False) -> str:
         """
@@ -170,7 +174,7 @@ class HouseService:
         success_msg = f"恭喜您，数据已全部导入成功！{result_msg}，数据如下：" + success_msg
         return success_msg
 
-        
+
     @staticmethod
     def _clean_dongguan_town(town_name: str) -> str:
         """
