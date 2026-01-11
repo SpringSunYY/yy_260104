@@ -53,6 +53,7 @@ class LikeMapper:
                 stmt = stmt.where(LikePo.create_time <= end_val)
             if "criterian_meta" in g and g.criterian_meta.page:
                 g.criterian_meta.page.stmt = stmt
+            stmt = stmt.order_by(LikePo.create_time.desc())
             result = db.session.execute(stmt).scalars().all()
             return [Like.model_validate(item) for item in result] if result else []
         except Exception as e:
@@ -111,6 +112,21 @@ class LikeMapper:
             db.session.rollback()
             print(f"新增用户点赞出错: {e}")
             return 0
+
+
+    @classmethod
+    def select_like_by_user_id_and_house_id(cls, user_id, house_id)-> Optional[Like]:
+        """
+        根据用户查询是否点赞
+        """
+        try:
+            result = db.session.execute(
+                select(LikePo).where(LikePo.user_id == user_id, LikePo.house_id == house_id)
+            ).scalars().first()
+            return Like.model_validate(result) if result else None
+        except Exception as e:
+            print(f"根据用户查询是否点赞出错: {e}")
+            return None
 
     @classmethod
     def update_like(cls, like: Like) -> int:

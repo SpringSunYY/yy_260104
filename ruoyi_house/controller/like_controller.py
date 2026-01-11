@@ -72,6 +72,24 @@ def add_like(dto: Like):
     return AjaxResponse.from_error(msg='新增失败')
 
 
+@gen.route('/like', methods=['POST'])
+@BodyValidator()
+@PreAuthorize(HasPerm('house:like:add'))
+@Log(title='用户点赞管理', business_type=BusinessType.INSERT)
+@JsonSerializer()
+def like(dto: Like):
+    """用户点赞"""
+    like_entity = Like()
+    # 转换PO到Entity对象
+    for attr in dto.model_fields.keys():
+        if hasattr(like_entity, attr):
+            setattr(like_entity, attr, getattr(dto, attr))
+    result = like_service.like(like_entity)
+    if result > 0:
+        return AjaxResponse.from_success(msg='点赞成功')
+    return AjaxResponse.from_error(msg='点赞失败')
+
+
 @gen.route('', methods=['PUT'])
 @BodyValidator()
 @PreAuthorize(HasPerm('house:like:edit'))

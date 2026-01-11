@@ -4,18 +4,18 @@
     <div v-if="loading" class="loading-section">
       <el-skeleton animated>
         <template slot="template">
-          <el-skeleton-item variant="image" style="width: 100%; height: 400px;" />
+          <el-skeleton-item variant="image" style="width: 100%; height: 400px;"/>
           <el-row :gutter="20" style="margin-top: 20px;">
             <el-col :span="16">
-              <el-skeleton-item variant="h1" style="width: 50%;" />
-              <el-skeleton-item variant="text" style="width: 100%; margin: 10px 0;" />
-              <el-skeleton-item variant="text" style="width: 80%;" />
-              <el-skeleton-item variant="text" style="width: 60%;" />
+              <el-skeleton-item variant="h1" style="width: 50%;"/>
+              <el-skeleton-item variant="text" style="width: 100%; margin: 10px 0;"/>
+              <el-skeleton-item variant="text" style="width: 80%;"/>
+              <el-skeleton-item variant="text" style="width: 60%;"/>
             </el-col>
             <el-col :span="8">
-              <el-skeleton-item variant="text" style="width: 100%;" />
-              <el-skeleton-item variant="text" style="width: 100%; margin: 10px 0;" />
-              <el-skeleton-item variant="text" style="width: 80%;" />
+              <el-skeleton-item variant="text" style="width: 100%;"/>
+              <el-skeleton-item variant="text" style="width: 100%; margin: 10px 0;"/>
+              <el-skeleton-item variant="text" style="width: 80%;"/>
             </el-col>
           </el-row>
         </template>
@@ -33,7 +33,7 @@
             <div v-if="imageList.length > 0" class="main-image">
               <el-carousel :autoplay="false" height="700px" arrow="always">
                 <el-carousel-item v-for="(image, index) in imageList" :key="index">
-                  <img :src="image" alt="房源图片" class="carousel-image" />
+                  <img :src="image" alt="房源图片" class="carousel-image"/>
                 </el-carousel-item>
               </el-carousel>
             </div>
@@ -89,7 +89,7 @@
                 <i class="el-icon-house"></i>
                 <span class="label">户型：</span>
                 <span class="value">
-                  <dict-tag :options="dict.type.house_type" :value="houseData.houseType" />
+                  <dict-tag :options="dict.type.house_type" :value="houseData.houseType"/>
                 </span>
               </div>
               <div class="info-item">
@@ -101,7 +101,7 @@
                 <i class="el-icon-location-outline"></i>
                 <span class="label">朝向：</span>
                 <span class="value">
-                  <dict-tag :options="dict.type.house_orientation" :value="houseData.orientation" />
+                  <dict-tag :options="dict.type.house_orientation" :value="houseData.orientation"/>
                 </span>
               </div>
               <div class="info-item">
@@ -113,7 +113,7 @@
                 <i class="el-icon-brush"></i>
                 <span class="label">装修：</span>
                 <span class="value">
-                  <dict-tag :options="dict.type.house_decoration_type" :value="houseData.decorationType" />
+                  <dict-tag :options="dict.type.house_decoration_type" :value="houseData.decorationType"/>
                 </span>
               </div>
               <div class="info-item">
@@ -176,9 +176,9 @@
               <div class="property-item">
                 <span class="label">产权信息：</span>
                 <span class="value">
-                  <dict-tag :options="dict.type.house_property_right_type" :value="houseData.propertyRightType" />
-                  <dict-tag :options="dict.type.house_property_right_year" :value="houseData.propertyRightYear" />
-                  <dict-tag :options="dict.type.house_property_type" :value="houseData.propertyType" />
+                  <dict-tag :options="dict.type.house_property_right_type" :value="houseData.propertyRightType"/>
+                  <dict-tag :options="dict.type.house_property_right_year" :value="houseData.propertyRightYear"/>
+                  <dict-tag :options="dict.type.house_property_type" :value="houseData.propertyType"/>
                 </span>
               </div>
             </div>
@@ -209,7 +209,7 @@
           </div>
         </div>
       </div>
-      </div>
+    </div>
 
     <!-- 错误状态 -->
     <div v-else class="error-section">
@@ -222,6 +222,7 @@
 
 <script>
 import {getHouseDetail} from "@/api/house/house";
+import {likeLike} from "@/api/house/like";
 
 export default {
   name: "HouseDetail",
@@ -297,8 +298,9 @@ export default {
     /** 切换点赞状态 */
     toggleLike() {
       this.isLiked = !this.isLiked;
-      this.$message.success(this.isLiked ? '已收藏' : '已取消收藏');
-      // 这里可以调用实际的点赞API
+      likeLike({houseId: this.hoseId}).then(res => {
+        this.$message.success(this.isLiked ? '已收藏' : '已取消收藏');
+      })
     },
 
     /** 返回列表 */
@@ -318,6 +320,7 @@ export default {
 .clearfix {
   clear: both;
 }
+
 .loading-section, .error-section {
   padding: 60px 0;
   text-align: center;

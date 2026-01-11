@@ -30,6 +30,15 @@ export function addLike(data) {
   })
 }
 
+// 点赞
+export function likeLike(data) {
+  return request({
+    url: '/house/like/like',
+    method: 'post',
+    data: data
+  })
+}
+
 // 修改用户点赞
 export function updateLike(data) {
   return request({

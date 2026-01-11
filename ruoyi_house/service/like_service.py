@@ -7,11 +7,16 @@ from typing import List, Optional
 
 from ruoyi_common.exception import ServiceException
 from ruoyi_common.utils.base import LogUtil
+from ruoyi_common.utils.security_util import get_user_id, get_username
 from ruoyi_house.domain.entity import Like
+from ruoyi_house.mapper import HouseMapper
 from ruoyi_house.mapper.like_mapper import LikeMapper
+from ruoyi_house.service import HouseService
+
 
 class LikeService:
     """用户点赞服务类"""
+
     @classmethod
     def select_like_list(cls, like: Like) -> List[Like]:
         """
@@ -25,7 +30,6 @@ class LikeService:
         """
         return LikeMapper.select_like_list(like)
 
-    
     @classmethod
     def select_like_by_id(cls, id: int) -> Optional[Like]:
         """
@@ -38,7 +42,7 @@ class LikeService:
             like: 用户点赞对象
         """
         return LikeMapper.select_like_by_id(id)
-    
+
     @classmethod
     def insert_like(cls, like: Like) -> int:
         """
@@ -52,7 +56,39 @@ class LikeService:
         """
         return LikeMapper.insert_like(like)
 
-    
+    @classmethod
+    def like(self, like_entity) -> int:
+        """
+        点赞
+
+        Args:
+            like_entity (Like): 用户点赞对象
+
+        Returns:
+            int: 插入的记录数
+        """
+        # 首先根据房源进行查询
+        house = HouseMapper.select_house_by_id(like_entity.house_id)
+        if house is None:
+            raise ServiceException("用户点赞失败，房源不存在")
+        ##其次根据用户和房源进行查询
+        user_id = get_user_id()
+        like_entity = LikeMapper.select_like_by_user_id_and_house_id(user_id, like_entity.house_id)
+        if like_entity is not None and like_entity.id is not None:
+            return LikeMapper.delete_like_by_ids([like_entity.id])
+        like = Like()
+        like.house_id = house.hose_id
+        like.user_id = user_id
+        like.user_name = get_username()
+        like.house_title = house.title
+        like.cover_image = house.cover_image
+        like.house_type = house.house_type
+        like.town = house.town
+        like.tags = house.tags
+        like.orientation = house.orientation
+        like.score = 15
+        return LikeMapper.insert_like(like)
+
     @classmethod
     def update_like(cls, like: Like) -> int:
         """
@@ -65,9 +101,7 @@ class LikeService:
             int: 更新的记录数
         """
         return LikeMapper.update_like(like)
-    
 
-    
     @classmethod
     def delete_like_by_ids(cls, ids: List[int]) -> int:
         """
@@ -80,7 +114,7 @@ class LikeService:
             int: 删除的记录数
         """
         return LikeMapper.delete_like_by_ids(ids)
-    
+
     @classmethod
     def import_like(cls, like_list: List[Like], is_update: bool = False) -> str:
         """
@@ -104,7 +138,7 @@ class LikeService:
         for like in like_list:
             try:
                 display_value = like
-                
+
                 display_value = getattr(like, "id", display_value)
                 existing = None
                 if like.id is not None:
@@ -118,7 +152,7 @@ class LikeService:
                         continue
                 else:
                     result = LikeMapper.insert_like(like)
-                
+
                 if result > 0:
                     success_count += 1
                     success_msg += f"<br/> 第{success_count}条数据，操作成功：{display_value}"

@@ -54,6 +54,7 @@ class ViewMapper:
                 stmt = stmt.where(ViewPo.create_time <= end_val)
             if "criterian_meta" in g and g.criterian_meta.page:
                 g.criterian_meta.page.stmt = stmt
+            stmt = stmt.order_by(ViewPo.create_time.desc())
             result = db.session.execute(stmt).scalars().all()
             return [View.model_validate(item) for item in result] if result else []
         except Exception as e:
@@ -197,4 +198,3 @@ class ViewMapper:
         except Exception as e:
             print(f"根据房源ID、用户ID和时间查询用户浏览出错: {e}")
             return None
-
