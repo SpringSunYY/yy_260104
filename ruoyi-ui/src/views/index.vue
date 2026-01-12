@@ -79,7 +79,7 @@ import HouseCard from '@/components/HouseCard'
 import { listMyRecommendations } from "@/api/house/recommend";
 
 export default {
-  name: "HomePage",
+  name: "Index",
   components: {
     HouseCard
   },

@@ -31,14 +31,12 @@ class RecommendMapper:
             # 构建查询条件
             stmt = select(RecommendPo)
 
-
             if recommend.id is not None:
                 stmt = stmt.where(RecommendPo.id == recommend.id)
 
 
             if recommend.user_name:
                 stmt = stmt.where(RecommendPo.user_name.like("%" + str(recommend.user_name) + "%"))
-
             _params = getattr(recommend, "params", {}) or {}
             begin_val = _params.get("beginCreateTime")
             end_val = _params.get("endCreateTime")
@@ -48,6 +46,7 @@ class RecommendMapper:
                 stmt = stmt.where(RecommendPo.create_time <= end_val)
             if "criterian_meta" in g and g.criterian_meta.page:
                 g.criterian_meta.page.stmt = stmt
+            stmt = stmt.order_by(RecommendPo.create_time.desc())
             result = db.session.execute(stmt).scalars().all()
             return [Recommend.model_validate(item) for item in result] if result else []
         except Exception as e:
