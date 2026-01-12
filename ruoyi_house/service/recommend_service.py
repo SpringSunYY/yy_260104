@@ -35,7 +35,7 @@ class RecommendService:
     LIKE_NEW_RECORDS_COUNT = 1  # 创建模型后最新点赞记录数量
     # 推荐配置
     MAX_RECOMMENDATIONS = 1000  # 最大推荐数量
-    TAG_COMBINATION_BONUS = 0.5  # 标签组合奖励倍数（每个额外标签增加的权重倍数）
+    TAG_COMBINATION_BONUS = 1.5  # 标签组合奖励倍数
 
     @classmethod
     def generate_recommendations(cls, user_id: int, top_n: int = 10) -> List[str]:
@@ -61,7 +61,7 @@ class RecommendService:
 
             # 3. 智能采样房源进行评分（避免全表查询）
             sampled_houses = cls._sample_houses_for_scoring(user_preferences, top_n * 10)  # 采样更多用于排序
-            LogUtil.logger.info(f"[推荐算法] 对{sampled_houses}个采样房源进行评分计算")
+            LogUtil.logger.info(f"[推荐算法] 对{len(sampled_houses)}个采样房源进行评分计算")
 
             house_scores = cls._calculate_house_scores(sampled_houses, user_preferences, user_behaviors)
             LogUtil.logger.info(f"[推荐算法] 计算出{len(house_scores)}个房源得分")
@@ -494,20 +494,13 @@ class RecommendService:
                 preferences['orientation'][behavior['orientation']] = preferences['orientation'].get(
                     behavior['orientation'], 0) + score
 
-            # 处理标签偏好 - 考虑标签组合权重
+            # 处理标签偏好
             if behavior['tags']:
                 tags = behavior['tags'].split(';') if behavior['tags'] else []
-                tags = [tag.strip() for tag in tags if tag.strip()]
-
-                if tags:
-                    # 标签组合权重：基础权重 + 标签数量奖励
-                    # 例如：1个标签=基础权重，2个标签=基础权重*1.5，3个标签=基础权重*2，以此类推
-                    tag_combination_bonus = len(tags) * cls.TAG_COMBINATION_BONUS  # 每个额外标签增加的权重倍数
-                    enhanced_score = score * (1.0 + tag_combination_bonus)
-
-                    # 为每个标签分配增强后的权重
-                    for tag in tags:
-                        preferences['tags'][tag] = preferences['tags'].get(tag, 0) + enhanced_score
+                for tag in tags:
+                    tag = tag.strip()
+                    if tag:
+                        preferences['tags'][tag] = preferences['tags'].get(tag, 0) + score
 
         LogUtil.logger.info(f"[推荐算法] 计算用户偏好完成，基准时间: {latest_time}")
         return preferences
@@ -857,13 +850,24 @@ class RecommendService:
                 orientation_score = user_preferences['orientation'][house.orientation] * cls.WEIGHTS['orientation']
                 total_score += orientation_score
 
-            # 计算标签相似度得分
+            # 计算标签相似度得分 - 考虑标签组合奖励
             if house.tags:
                 house_tags = set(tag.strip() for tag in house.tags.split(';') if tag.strip())
+                matched_tags = []
                 tag_score = 0
+
+                # 计算匹配的标签权重总和
                 for tag in house_tags:
                     if tag in user_preferences['tags']:
                         tag_score += user_preferences['tags'][tag]
+                        matched_tags.append(tag)
+
+                # 如果匹配的标签数量超过1个，给予组合奖励
+                if len(matched_tags) > 1:
+                    # 组合奖励：每个额外匹配的标签给予固定奖励分
+                    combination_bonus = (len(matched_tags) - 1) * cls.TAG_COMBINATION_BONUS
+                    tag_score += combination_bonus
+
                 total_score += tag_score * cls.WEIGHTS['tags']
 
             # 即使得分很低也保留，至少给每个房源一个基础得分用于多样性

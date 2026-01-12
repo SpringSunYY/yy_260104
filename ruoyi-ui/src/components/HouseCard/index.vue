@@ -18,7 +18,7 @@
         <!-- 房源标签 - 左下角 -->
         <div class="tags-overlay" v-if="house.tags">
           <el-tag
-            v-for="tag in getTags(house.tags).slice(0, 3)"
+            v-for="tag in getTags(house.tags).slice(0, 5)"
             :key="tag"
             size="mini"
             type="warning"
