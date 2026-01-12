@@ -34,12 +34,14 @@
         />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
-        <el-input
-          v-model="queryParams.createTime"
-          placeholder="请输入创建时间"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-date-picker
+          v-model="dateRangeCreateTime"
+          value-format="yyyy-MM-dd"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+        ></el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -56,7 +58,8 @@
           size="mini"
           @click="handleAdd"
           v-hasPermi="['house:view:add']"
-        >新增</el-button>
+        >新增
+        </el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -67,7 +70,8 @@
           :disabled="single"
           @click="handleUpdate"
           v-hasPermi="['house:view:edit']"
-        >修改</el-button>
+        >修改
+        </el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -78,7 +82,8 @@
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['house:view:remove']"
-        >删除</el-button>
+        >删除
+        </el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -88,7 +93,8 @@
           size="mini"
           @click="handleExport"
           v-hasPermi="['house:view:export']"
-        >导出</el-button>
+        >导出
+        </el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -98,29 +104,42 @@
           size="mini"
           @click="handleImport"
           v-hasPermi="['house:view:import']"
-        >导入</el-button>
+        >导入
+        </el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
     </el-row>
 
     <el-table :loading="loading" :data="viewList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="浏览编号" :show-overflow-tooltip="true" v-if="columns[0].visible" prop="id" />
-      <el-table-column label="用户" align="center" :show-overflow-tooltip="true" v-if="columns[1].visible" prop="userId" />
-      <el-table-column label="用户名" align="center" :show-overflow-tooltip="true" v-if="columns[2].visible" prop="userName" />
-      <el-table-column label="房源编号" align="center" :show-overflow-tooltip="true" v-if="columns[3].visible" prop="houseId" />
-      <el-table-column label="名称" align="center" :show-overflow-tooltip="true" v-if="columns[4].visible" prop="houseTitle" />
+      <el-table-column type="selection" width="55" align="center"/>
+      <el-table-column label="浏览编号" :show-overflow-tooltip="true" v-if="columns[0].visible" prop="id"/>
+      <el-table-column label="用户" align="center" :show-overflow-tooltip="true" v-if="columns[1].visible"
+                       prop="userId"/>
+      <el-table-column label="用户名" align="center" :show-overflow-tooltip="true" v-if="columns[2].visible"
+                       prop="userName"/>
+      <el-table-column label="房源编号" align="center" :show-overflow-tooltip="true" v-if="columns[3].visible"
+                       prop="houseId"/>
+      <el-table-column label="名称" align="center" :show-overflow-tooltip="true" v-if="columns[4].visible"
+                       prop="houseTitle"/>
       <el-table-column label="封面" align="center" v-if="columns[5].visible" prop="coverImage" width="100">
         <template slot-scope="scope">
           <image-preview :src="scope.row.coverImage" :width="50" :height="50"/>
         </template>
       </el-table-column>
-      <el-table-column label="镇" align="center" :show-overflow-tooltip="true" v-if="columns[6].visible" prop="town" />
-      <el-table-column label="户型" align="center" :show-overflow-tooltip="true" v-if="columns[7].visible" prop="houseType" />
-      <el-table-column label="朝向" align="center" :show-overflow-tooltip="true" v-if="columns[8].visible" prop="orientation" />
-      <el-table-column label="房源标签" align="center" :show-overflow-tooltip="true" v-if="columns[9].visible" prop="tags" />
-      <el-table-column label="分数" align="center" :show-overflow-tooltip="true" v-if="columns[10].visible" prop="score" />
-      <el-table-column label="创建时间" align="center" :show-overflow-tooltip="true" v-if="columns[11].visible" prop="createTime" />
+      <el-table-column label="镇" align="center" :show-overflow-tooltip="true" v-if="columns[6].visible" prop="town"/>
+      <el-table-column label="户型" align="center" :show-overflow-tooltip="true" v-if="columns[7].visible"
+                       prop="houseType"/>
+      <el-table-column label="朝向" align="center" :show-overflow-tooltip="true" v-if="columns[8].visible"
+                       prop="orientation"/>
+      <el-table-column label="房源标签" align="center" :show-overflow-tooltip="true" v-if="columns[9].visible"
+                       prop="tags"/>
+      <el-table-column label="分数" align="center" :show-overflow-tooltip="true" v-if="columns[10].visible"
+                       prop="score"/>
+      <el-table-column label="创建时间" align="center" v-if="columns[11].visible" prop="createTime" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -129,14 +148,16 @@
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['house:view:edit']"
-          >修改</el-button>
+          >修改
+          </el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['house:view:remove']"
-          >删除</el-button>
+          >删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -153,7 +174,7 @@
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="分数" prop="score">
-          <el-input v-model="form.score" placeholder="请输入分数" />
+          <el-input v-model="form.score" placeholder="请输入分数"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -180,10 +201,13 @@
         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
         <div class="el-upload__tip text-center" slot="tip">
           <div class="el-upload__tip" slot="tip">
-            <el-checkbox v-model="upload.updateSupport" /> 是否更新已经存在的用户浏览数据
+            <el-checkbox v-model="upload.updateSupport"/>
+            是否更新已经存在的用户浏览数据
           </div>
           <span>仅允许导入xls、xlsx格式文件。</span>
-          <el-link type="primary" :underline="false" style="font-size:12px;vertical-align: baseline;" @click="importTemplate">下载模板</el-link>
+          <el-link type="primary" :underline="false" style="font-size:12px;vertical-align: baseline;"
+                   @click="importTemplate">下载模板
+          </el-link>
         </div>
       </el-upload>
       <div slot="footer" class="dialog-footer">
@@ -197,8 +221,8 @@
 <script>
 
 
-import { listView, getView, delView, addView, updateView } from "@/api/house/view";
-import { getToken } from "@/utils/auth";
+import {listView, getView, delView, addView, updateView} from "@/api/house/view";
+import {getToken} from "@/utils/auth";
 
 export default {
   name: "View",
@@ -220,23 +244,25 @@ export default {
       viewList: [],
       // 表格列信息
       columns: [
-        { key: 0, label: '浏览编号', visible: true },
-        { key: 1, label: '用户', visible: true },
-        { key: 2, label: '用户名', visible: true },
-        { key: 3, label: '房源编号', visible: true },
-        { key: 4, label: '名称', visible: true },
-        { key: 5, label: '封面', visible: true },
-        { key: 6, label: '镇', visible: true },
-        { key: 7, label: '户型', visible: true },
-        { key: 8, label: '朝向', visible: true },
-        { key: 9, label: '房源标签', visible: true },
-        { key: 10, label: '分数', visible: true },
-        { key: 11, label: '创建时间', visible: true }
+        {key: 0, label: '浏览编号', visible: true},
+        {key: 1, label: '用户', visible: true},
+        {key: 2, label: '用户名', visible: true},
+        {key: 3, label: '房源编号', visible: true},
+        {key: 4, label: '名称', visible: true},
+        {key: 5, label: '封面', visible: true},
+        {key: 6, label: '镇', visible: true},
+        {key: 7, label: '户型', visible: true},
+        {key: 8, label: '朝向', visible: true},
+        {key: 9, label: '房源标签', visible: true},
+        {key: 10, label: '分数', visible: true},
+        {key: 11, label: '创建时间', visible: true}
       ],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
       open: false,
+      // 创建时间时间范围
+      dateRangeCreateTime: [],
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -260,29 +286,29 @@ export default {
         // 是否更新已经存在的用户浏览数据
         updateSupport: 0,
         // 设置上传的请求头部
-        headers: { Authorization: "Bearer " + getToken() },
+        headers: {Authorization: "Bearer " + getToken()},
         // 上传的地址
         url: process.env.VUE_APP_BASE_API + "/house/view/importData"
       },
       // 表单校验
       rules: {
         id: [
-          { required: true, message: "浏览编号不能为空", trigger: "blur" }
+          {required: true, message: "浏览编号不能为空", trigger: "blur"}
         ],
         userId: [
-          { required: true, message: "用户不能为空", trigger: "blur" }
+          {required: true, message: "用户不能为空", trigger: "blur"}
         ],
         userName: [
-          { required: true, message: "用户名不能为空", trigger: "blur" }
+          {required: true, message: "用户名不能为空", trigger: "blur"}
         ],
         houseId: [
-          { required: true, message: "房源编号不能为空", trigger: "blur" }
+          {required: true, message: "房源编号不能为空", trigger: "blur"}
         ],
         score: [
-          { required: true, message: "分数不能为空", trigger: "blur" }
+          {required: true, message: "分数不能为空", trigger: "blur"}
         ],
         createTime: [
-          { required: true, message: "创建时间不能为空", trigger: "blur" }
+          {required: true, message: "创建时间不能为空", trigger: "blur"}
         ]
       }
     };
@@ -294,6 +320,11 @@ export default {
     /** 查询用户浏览列表 */
     getList() {
       this.loading = true;
+      this.queryParams.params = {};
+      if (null != this.dateRangeCreateTime && '' != this.dateRangeCreateTime.toString()) {
+        this.queryParams.params["begincreateTime"] = this.dateRangeCreateTime[0];
+        this.queryParams.params["endcreateTime"] = this.dateRangeCreateTime[1];
+      }
       listView(this.queryParams).then(response => {
         this.viewList = response.rows;
         this.total = response.total;
@@ -330,13 +361,14 @@ export default {
     },
     /** 重置按钮操作 */
     resetQuery() {
+      this.dateRangeCreateTime = [];
       this.resetForm("queryForm");
       this.handleQuery();
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
+      this.single = selection.length !== 1
       this.multiple = !selection.length
     },
     /** 新增按钮操作 */
@@ -379,12 +411,13 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const viewIds = row.id || this.ids;
-      this.$modal.confirm('是否确认删除用户浏览编号为"' + viewIds + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除用户浏览编号为"' + viewIds + '"的数据项？').then(function () {
         return delView(viewIds);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+      }).catch(() => {
+      });
     },
     /** 导出按钮操作 */
     handleExport() {
@@ -414,12 +447,12 @@ export default {
       this.upload.open = false;
       this.upload.isUploading = false;
       this.$refs.upload.clearFiles();
-      this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", { dangerouslyUseHTMLString: true });
+      this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", {dangerouslyUseHTMLString: true});
       this.$modal.closeLoading()
       this.getList();
     },
     buildSubmitData() {
-      const data = { ...this.form };
+      const data = {...this.form};
       if (data.id !== null && data.id !== undefined && data.id !== "") {
         data.id = parseInt(data.id, 10);
       } else {

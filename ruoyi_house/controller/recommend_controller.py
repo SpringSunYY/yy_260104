@@ -1,4 +1,3 @@
-
 from typing import List
 
 from flask import g
@@ -10,9 +9,11 @@ from werkzeug.datastructures import FileStorage
 from ruoyi_common.base.model import AjaxResponse, TableResponse
 from ruoyi_common.constant import HttpStatus
 from ruoyi_common.descriptor.serializer import BaseSerializer, JsonSerializer
-from ruoyi_common.descriptor.validator import QueryValidator, BodyValidator, PathValidator, FileDownloadValidator, FileUploadValidator
+from ruoyi_common.descriptor.validator import QueryValidator, BodyValidator, PathValidator, FileDownloadValidator, \
+    FileUploadValidator
 from ruoyi_common.domain.enum import BusinessType
-from ruoyi_common.utils.base import ExcelUtil
+from ruoyi_common.utils.base import ExcelUtil, LogUtil
+from ruoyi_common.utils.security_util import get_user_id
 from ruoyi_framework.descriptor.log import Log
 from ruoyi_framework.descriptor.permission import HasPerm, PreAuthorize
 from ruoyi_house.controller import recommend as recommend_bp
@@ -151,3 +152,46 @@ def import_data(
     recommend_list = excel_util.import_file(file, sheetname="用户推荐数据")
     msg = recommend_service.import_recommend(recommend_list, update_support)
     return AjaxResponse.from_success(msg=msg)
+
+
+@gen.route('/my-recommendations', methods=['GET'])
+@QueryValidator(is_page=True)
+@PreAuthorize(HasPerm('house:recommend:list'))
+@JsonSerializer()
+def get_my_recommendations():
+    """获取我的推荐房源列表"""
+    try:
+        user_id = get_user_id()
+        # 直接从请求参数获取分页信息，避免别名转换问题
+        from flask import request
+        page_num = int(request.args.get('pageNum', 1))
+        page_size = int(request.args.get('pageSize', 10))
+
+        LogUtil.logger.info(f"[推荐接口] 用户ID: {user_id}, 请求参数: pageNum={page_num}, pageSize={page_size}")
+
+        if not user_id:
+            LogUtil.logger.warning("[推荐接口] 用户未登录")
+            return AjaxResponse.from_error(msg='用户未登录')
+
+        # 调用Service层处理所有业务逻辑（包括自动生成推荐）
+        houses, total = recommend_service.get_user_recommendations_with_auto_generate(user_id, page_num, page_size)
+
+        if total == 0:
+            return TableResponse(code=HttpStatus.SUCCESS, msg='暂无推荐记录', rows=[], total=0)
+
+        LogUtil.logger.info(f"[推荐接口] 用户{user_id}响应数据: 总推荐数={total}, 当前页返回={len(houses)}")
+
+        # 设置分页信息，让TableResponse的computed_field正确返回total
+        from ruoyi_common.base.model import PageModel
+        page_model = PageModel(page_num=page_num, page_size=page_size, total=total)
+        g.criterian_meta.page = page_model
+
+        return TableResponse(
+            code=HttpStatus.SUCCESS,
+            msg='查询成功',
+            rows=houses
+        )
+
+    except Exception as e:
+        LogUtil.logger.error(f"[推荐接口] 获取用户{user_id}推荐失败: {str(e)}", exc_info=True)
+        return AjaxResponse.from_error(msg=f'获取推荐失败: {str(e)}')

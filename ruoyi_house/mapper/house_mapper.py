@@ -238,3 +238,152 @@ class HouseMapper:
             db.session.rollback()
             print(f"批量删除房源信息出错: {e}")
             return 0
+
+    @classmethod
+    def select_houses_by_town(cls, town: str, limit: int = 50) -> List[House]:
+        """
+        根据镇查询房源
+
+        Args:
+            town (str): 镇名称
+            limit (int): 限制数量
+
+        Returns:
+            List[House]: 房源列表
+        """
+        try:
+            stmt = select(HousePo).where(HousePo.town == town).order_by(HousePo.house_id.desc()).limit(limit)
+            result = db.session.execute(stmt)
+            house_pos = result.scalars().all()
+
+            houses = []
+            for house_po in house_pos:
+                house = House()
+                for attr in house.model_fields.keys():
+                    if hasattr(house_po, attr):
+                        setattr(house, attr, getattr(house_po, attr))
+                houses.append(house)
+
+            return houses
+        except Exception as e:
+            print(f"根据镇{town}查询房源出错: {e}")
+            return []
+
+    @classmethod
+    def select_houses_by_house_type(cls, house_type: str, limit: int = 50) -> List[House]:
+        """
+        根据户型查询房源
+
+        Args:
+            house_type (str): 户型
+            limit (int): 限制数量
+
+        Returns:
+            List[House]: 房源列表
+        """
+        try:
+            stmt = select(HousePo).where(HousePo.house_type == house_type).order_by(HousePo.house_id.desc()).limit(limit)
+            result = db.session.execute(stmt)
+            house_pos = result.scalars().all()
+
+            houses = []
+            for house_po in house_pos:
+                house = House()
+                for attr in house.model_fields.keys():
+                    if hasattr(house_po, attr):
+                        setattr(house, attr, getattr(house_po, attr))
+                houses.append(house)
+
+            return houses
+        except Exception as e:
+            print(f"根据户型{house_type}查询房源出错: {e}")
+            return []
+
+    @classmethod
+    def select_houses_by_orientation(cls, orientation: str, limit: int = 50) -> List[House]:
+        """
+        根据朝向查询房源
+
+        Args:
+            orientation (str): 朝向
+            limit (int): 限制数量
+
+        Returns:
+            List[House]: 房源列表
+        """
+        try:
+            stmt = select(HousePo).where(HousePo.orientation == orientation).order_by(HousePo.house_id.desc()).limit(limit)
+            result = db.session.execute(stmt)
+            house_pos = result.scalars().all()
+
+            houses = []
+            for house_po in house_pos:
+                house = House()
+                for attr in house.model_fields.keys():
+                    if hasattr(house_po, attr):
+                        setattr(house, attr, getattr(house_po, attr))
+                houses.append(house)
+
+            return houses
+        except Exception as e:
+            print(f"根据朝向{orientation}查询房源出错: {e}")
+            return []
+
+    @classmethod
+    def select_recent_houses(cls, limit: int = 50) -> List[House]:
+        """
+        查询最近的房源（按ID倒序）
+
+        Args:
+            limit (int): 限制数量
+
+        Returns:
+            List[House]: 房源列表
+        """
+        try:
+            stmt = select(HousePo).order_by(HousePo.house_id.desc()).limit(limit)
+            result = db.session.execute(stmt)
+            house_pos = result.scalars().all()
+
+            houses = []
+            for house_po in house_pos:
+                house = House()
+                for attr in house.model_fields.keys():
+                    if hasattr(house_po, attr):
+                        setattr(house, attr, getattr(house_po, attr))
+                houses.append(house)
+
+            return houses
+        except Exception as e:
+            print(f"查询最近房源出错: {e}")
+            return []
+
+    @classmethod
+    def select_houses_by_tag_like(cls, tag: str, limit: int = 50) -> List[House]:
+        """
+        根据标签模糊匹配查询房源
+
+        Args:
+            tag (str): 标签关键词
+            limit (int): 限制数量
+
+        Returns:
+            List[House]: 房源列表
+        """
+        try:
+            stmt = select(HousePo).where(HousePo.tags.like(f"%{tag}%")).order_by(HousePo.house_id.desc()).limit(limit)
+            result = db.session.execute(stmt)
+            house_pos = result.scalars().all()
+
+            houses = []
+            for house_po in house_pos:
+                house = House()
+                for attr in house.model_fields.keys():
+                    if hasattr(house_po, attr):
+                        setattr(house, attr, getattr(house_po, attr))
+                houses.append(house)
+
+            return houses
+        except Exception as e:
+            print(f"根据标签'{tag}'模糊查询房源出错: {e}")
+            return []

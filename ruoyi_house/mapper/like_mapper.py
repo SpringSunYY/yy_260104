@@ -206,4 +206,37 @@ class LikeMapper:
         except Exception as e:
             print(f"根据 house_id 和 user_id 查询用户点赞出错: {e}")
             return None
-        pass
+
+    @classmethod
+    def select_likes_after_time(cls, user_id: int, after_time: datetime) -> List[Like]:
+        """
+        查询指定时间之后用户的点赞记录
+
+        Args:
+            user_id (int): 用户ID
+            after_time (datetime): 时间点
+
+        Returns:
+            List[Like]: 点赞记录列表
+        """
+        try:
+            stmt = select(LikePo).where(
+                LikePo.user_id == user_id,
+                LikePo.create_time > after_time
+            )
+            result = db.session.execute(stmt)
+            like_pos = result.scalars().all()
+
+            likes = []
+            for like_po in like_pos:
+                like = Like()
+                # 转换PO到Entity
+                for attr in like.model_fields.keys():
+                    if hasattr(like_po, attr):
+                        setattr(like, attr, getattr(like_po, attr))
+                likes.append(like)
+
+            return likes
+        except Exception as e:
+            print(f"查询用户{user_id}在{after_time}之后的点赞记录失败: {str(e)}")
+            return []

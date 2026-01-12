@@ -47,3 +47,12 @@ export function delRecommend(id) {
     method: 'delete'
   })
 }
+
+// 查询我的推荐房源列表
+export function listMyRecommendations(query) {
+  return request({
+    url: '/house/recommend/my-recommendations',
+    method: 'get',
+    params: query
+  })
+}

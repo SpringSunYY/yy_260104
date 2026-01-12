@@ -39,8 +39,6 @@ class RecommendMapper:
             if recommend.user_name:
                 stmt = stmt.where(RecommendPo.user_name.like("%" + str(recommend.user_name) + "%"))
 
-
-
             _params = getattr(recommend, "params", {}) or {}
             begin_val = _params.get("beginCreateTime")
             end_val = _params.get("endCreateTime")
@@ -56,7 +54,7 @@ class RecommendMapper:
             print(f"查询用户推荐列表出错: {e}")
             return []
 
-    
+
     @classmethod
     def select_recommend_by_id(cls, id: int) -> Optional[Recommend]:
         """
@@ -74,7 +72,26 @@ class RecommendMapper:
         except Exception as e:
             print(f"根据ID查询用户推荐出错: {e}")
             return None
-    
+
+    @classmethod
+    def select_latest_recommend_by_user_id(cls, user_id: int) -> Optional[Recommend]:
+        """
+        根据用户ID查询最新的推荐记录
+
+        Args:
+            user_id (int): 用户ID
+
+        Returns:
+            recommend: 最新的用户推荐对象
+        """
+        try:
+            stmt = select(RecommendPo).where(RecommendPo.user_id == user_id).order_by(RecommendPo.create_time.desc()).limit(1)
+            result = db.session.execute(stmt).scalar_one_or_none()
+            return Recommend.model_validate(result) if result else None
+        except Exception as e:
+            print(f"根据用户ID查询最新推荐出错: {e}")
+            return None
+
 
     @classmethod
     def insert_recommend(cls, recommend: Recommend) -> int:
@@ -105,7 +122,7 @@ class RecommendMapper:
             print(f"新增用户推荐出错: {e}")
             return 0
 
-    
+
     @classmethod
     def update_recommend(cls, recommend: Recommend) -> int:
         """
@@ -118,7 +135,7 @@ class RecommendMapper:
             int: 更新的记录数
         """
         try:
-            
+
             existing = db.session.get(RecommendPo, recommend.id)
             if not existing:
                 return 0
@@ -131,7 +148,7 @@ class RecommendMapper:
             existing.create_time = recommend.create_time
             db.session.commit()
             return 1
-            
+
         except Exception as e:
             db.session.rollback()
             print(f"修改用户推荐出错: {e}")
@@ -157,4 +174,3 @@ class RecommendMapper:
             db.session.rollback()
             print(f"批量删除用户推荐出错: {e}")
             return 0
-    

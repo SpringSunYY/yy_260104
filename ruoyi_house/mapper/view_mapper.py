@@ -198,3 +198,37 @@ class ViewMapper:
         except Exception as e:
             print(f"根据房源ID、用户ID和时间查询用户浏览出错: {e}")
             return None
+
+    @classmethod
+    def select_views_after_time(cls, user_id: int, after_time: datetime) -> List[View]:
+        """
+        查询指定时间之后用户的浏览记录
+
+        Args:
+            user_id (int): 用户ID
+            after_time (datetime): 时间点
+
+        Returns:
+            List[View]: 浏览记录列表
+        """
+        try:
+            stmt = select(ViewPo).where(
+                ViewPo.user_id == user_id,
+                ViewPo.create_time > after_time
+            )
+            result = db.session.execute(stmt)
+            view_pos = result.scalars().all()
+
+            views = []
+            for view_po in view_pos:
+                view = View()
+                # 转换PO到Entity
+                for attr in view.model_fields.keys():
+                    if hasattr(view_po, attr):
+                        setattr(view, attr, getattr(view_po, attr))
+                views.append(view)
+
+            return views
+        except Exception as e:
+            print(f"查询用户{user_id}在{after_time}之后的浏览记录失败: {str(e)}")
+            return []
