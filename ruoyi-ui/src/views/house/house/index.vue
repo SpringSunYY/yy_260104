@@ -1,9 +1,9 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="房源编号" prop="hoseId">
+      <el-form-item label="房源编号" prop="houseId">
         <el-input
-          v-model="queryParams.hoseId"
+          v-model="queryParams.houseId"
           placeholder="请输入房源编号"
           clearable
           @keyup.enter.native="handleQuery"
@@ -216,7 +216,7 @@
 
     <el-table :loading="loading" :data="houseList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center"/>
-      <el-table-column label="房源编号" :show-overflow-tooltip="true" v-if="columns[0].visible" prop="hoseId"/>
+      <el-table-column label="房源编号" :show-overflow-tooltip="true" v-if="columns[0].visible" prop="houseId"/>
       <el-table-column label="房源编码" align="center" :show-overflow-tooltip="true" v-if="columns[1].visible"
                        prop="houseCode"/>
       <el-table-column label="封面图片" align="center" v-if="columns[2].visible" prop="coverImage" width="100">
@@ -345,8 +345,8 @@
     <!-- 添加或修改房源信息对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="房源编号" prop="hoseId">
-          <el-input :readonly="isUpdate" v-model="form.hoseId" placeholder="请输入房源编号"/>
+        <el-form-item label="房源编号" prop="houseId">
+          <el-input :readonly="isUpdate" v-model="form.houseId" placeholder="请输入房源编号"/>
         </el-form-item>
         <el-form-item label="房源编码" prop="houseCode">
           <el-input v-model="form.houseCode" placeholder="请输入房源编码"/>
@@ -588,7 +588,7 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        hoseId: null,
+        houseId: null,
         houseCode: null,
         title: null,
         community: null,
@@ -622,7 +622,7 @@ export default {
       },
       // 表单校验
       rules: {
-        hoseId: [
+        houseId: [
           {required: true, message: "房源编号不能为空", trigger: "blur"}
         ],
         houseCode: [
@@ -652,7 +652,7 @@ export default {
     // 表单重置
     reset() {
       this.form = {
-        hoseId: null,
+        houseId: null,
         houseCode: null,
         coverImage: null,
         title: null,
@@ -694,7 +694,7 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.hoseId)
+      this.ids = selection.map(item => item.houseId)
       this.single = selection.length !== 1
       this.multiple = !selection.length
     },
@@ -707,9 +707,9 @@ export default {
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const hoseId = row.hoseId || this.ids
+      const houseId = row.houseId || this.ids
       this.isUpdate = true;
-      getHouse(hoseId).then(response => {
+      getHouse(houseId).then(response => {
         this.form = response.data;
         this.open = true;
         this.title = "修改房源信息";
@@ -720,7 +720,7 @@ export default {
       this.$refs["form"].validate(valid => {
         if (valid) {
           const submitData = this.buildSubmitData();
-          if (submitData.hoseId != null && this.isUpdate) {
+          if (submitData.houseId != null && this.isUpdate) {
             updateHouse(submitData).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
@@ -738,7 +738,7 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const houseIds = row.hoseId || this.ids;
+      const houseIds = row.houseId || this.ids;
       this.$modal.confirm('是否确认删除房源信息编号为"' + houseIds + '"的数据项？').then(function () {
         return delHouse(houseIds);
       }).then(() => {

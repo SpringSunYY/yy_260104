@@ -155,7 +155,7 @@
         <div class="house-grid">
           <div
             v-for="house in houseList"
-            :key="house.hoseId"
+            :key="house.houseId"
             class="house-card"
           >
             <!-- 房源图片区域 -->
@@ -193,7 +193,7 @@
               <!-- 标题 -->
               <div class="title-section">
                 <router-link
-                  :to="'/house/detail/index/' + house.hoseId" class="house-title">
+                  :to="'/house/detail/index/' + house.houseId" class="house-title">
                   {{ house.title }}
                 </router-link>
               </div>
@@ -255,7 +255,7 @@
 
               <!-- 房源编码 -->
               <div class="house-code">
-                <span class="code-value">{{ house.hoseId }}</span>
+                <span class="code-value">{{ house.houseId }}</span>
               </div>
             </div>
           </div>
@@ -324,7 +324,7 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 12,
-        hoseId: null,
+        houseId: null,
         houseCode: null,
         title: null,
         community: null,
@@ -440,7 +440,7 @@ export default {
       this.queryParams = {
         pageNum: 1,
         pageSize: 12,
-        hoseId: null,
+        houseId: null,
         houseCode: null,
         title: null,
         community: null,

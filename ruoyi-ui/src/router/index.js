@@ -99,7 +99,7 @@ export const dynamicRoutes = [
     permissions: ['house:house:query'],
     children: [
       {
-        path: 'index/:hoseId',
+        path: 'index/:houseId',
         component: () => import('@/views/house/house/detail'),
         name: 'HouseDetail',
         meta: { title: '房源详情',activeMenu: '/house/house/query' }

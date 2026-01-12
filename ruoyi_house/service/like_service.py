@@ -77,7 +77,7 @@ class LikeService:
         if like_entity is not None and like_entity.id is not None:
             return LikeMapper.delete_like_by_ids([like_entity.id])
         like = Like()
-        like.house_id = house.hose_id
+        like.house_id = house.house_id
         like.user_id = user_id
         like.user_name = get_username()
         like.house_title = house.title

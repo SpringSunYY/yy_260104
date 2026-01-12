@@ -45,23 +45,23 @@ def house_list(dto: House):
     return TableResponse(code=HttpStatus.SUCCESS, msg='查询成功', rows=houses)
 
 
-@gen.route('/<string:hoseId>', methods=['GET'])
+@gen.route('/<string:houseId>', methods=['GET'])
 @PathValidator()
 @PreAuthorize(HasPerm('house:house:query'))
 @JsonSerializer()
-def get_house(hose_id: str):
+def get_house(house_id: str):
     """获取房源信息详细信息"""
-    house_entity = house_service.select_house_by_id(hose_id)
+    house_entity = house_service.select_house_by_id(house_id)
     return AjaxResponse.from_success(data=house_entity)
 
 
-@gen.route('/detail/<string:hoseId>', methods=['GET'])
+@gen.route('/detail/<string:houseId>', methods=['GET'])
 @PathValidator()
 @PreAuthorize(HasPerm('house:house:query'))
 @JsonSerializer()
-def get_house_detail(hose_id: str):
+def get_house_detail(house_id: str):
     """获取房源信息详细信息"""
-    house_entity = house_service.select_house_detail_by_id(hose_id)
+    house_entity = house_service.select_house_detail_by_id(house_id)
     return AjaxResponse.from_success(data=house_entity)
 
 
@@ -109,7 +109,7 @@ def update_house(dto: House):
 def delete_house(ids: str):
     """删除房源信息"""
     try:
-        id_list = [int(id) for id in ids.split(',')]
+        id_list = [id for id in ids.split(',')]
         result = house_service.delete_house_by_ids(id_list)
         if result > 0:
             return AjaxResponse.from_success(msg='删除成功')

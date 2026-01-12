@@ -201,7 +201,7 @@
           <div class="code-info">
             <div class="code-item">
               <span class="label">房源编号：</span>
-              <span class="value">{{ houseData.hoseId }}</span>
+              <span class="value">{{ houseData.houseId }}</span>
               <span class="separator">|</span>
               <span class="label">房源编码：</span>
               <span class="value">{{ houseData.houseCode }}</span>
@@ -243,23 +243,23 @@ export default {
       houseData: null,
       imageList: [],
       isLiked: false,
-      hoseId: null,
+      houseId: null,
     };
   },
   created() {
-    this.hoseId = this.$route.params.hoseId;
+    this.houseId = this.$route.params.houseId;
     this.getHouseDetail();
   },
   methods: {
     /** 获取房源详情 */
     getHouseDetail() {
-      if (!this.hoseId) {
+      if (!this.houseId) {
         this.$message.error("房源ID不能为空");
         this.loading = false;
         return;
       }
 
-      getHouseDetail(this.hoseId).then(response => {
+      getHouseDetail(this.houseId).then(response => {
         this.houseData = response.data;
         this.isLiked = response.data.isLiked;
         // 处理图片列表
@@ -291,14 +291,14 @@ export default {
 
     /** 查看外部详情 */
     viewExternalDetail() {
-      const url = `https://dg.anjuke.com/prop/view/${this.houseData.hoseId}`;
+      const url = `https://dg.anjuke.com/prop/view/${this.houseData.houseId}`;
       window.open(url, '_blank');
     },
 
     /** 切换点赞状态 */
     toggleLike() {
       this.isLiked = !this.isLiked;
-      likeLike({houseId: this.hoseId}).then(res => {
+      likeLike({houseId: this.houseId}).then(res => {
         this.$message.success(this.isLiked ? '已收藏' : '已取消收藏');
       })
     },

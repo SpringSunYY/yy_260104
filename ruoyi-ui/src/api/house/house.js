@@ -14,17 +14,17 @@ export function listHouse(query) {
 }
 
 // 查询房源信息详细
-export function getHouse(hoseId) {
+export function getHouse(houseId) {
   return request({
-    url: '/house/house/' +hoseId,
+    url: '/house/house/' +houseId,
     method: 'get'
   })
 }
 
 //查询房源详细信息
-export function getHouseDetail(hoseId) {
+export function getHouseDetail(houseId) {
   return request({
-    url: '/house/house/detail/' +hoseId,
+    url: '/house/house/detail/' +houseId,
     method: 'get'
   })
 }
@@ -49,9 +49,9 @@ export function updateHouse(data) {
 }
 
 // 删除房源信息
-export function delHouse(hoseId) {
+export function delHouse(houseId) {
   return request({
-    url: '/house/house/' +hoseId,
+    url: '/house/house/' +houseId,
     method: 'delete'
   })
 }

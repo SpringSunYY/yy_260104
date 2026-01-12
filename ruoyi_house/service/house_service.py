@@ -34,46 +34,46 @@ class HouseService:
         return HouseMapper.select_house_list(house)
 
     @classmethod
-    def select_house_by_id(cls, hose_id: int) -> Optional[House]:
+    def select_house_by_id(cls, house_id: int) -> Optional[House]:
         """
         根据ID查询房源信息
 
         Args:
-            hose_id (int): 房源编号
+            house_id (int): 房源编号
 
         Returns:
             house: 房源信息对象
         """
-        return HouseMapper.select_house_by_id(hose_id)
+        return HouseMapper.select_house_by_id(house_id)
 
     @classmethod
-    def select_house_detail_by_id(cls, hose_id: str) -> Optional[House]:
+    def select_house_detail_by_id(cls, house_id: str) -> Optional[House]:
         """
         查询房源信息详情
 
         Args:
-            hose_id (int): 房源编号
+            house_id (int): 房源编号
 
         Returns:
             house: 房源信息对象
         """
-        house = HouseMapper.select_house_by_id(hose_id)
+        house = HouseMapper.select_house_by_id(house_id)
         if house is None:
-            raise ServiceException(f"没有查询到房源信息【{hose_id}】")
+            raise ServiceException(f"没有查询到房源信息【{house_id}】")
 
         # 查询用户有没有点赞
         user_id = get_user_id()
-        like = LikeMapper.select_like_by_house_id_and_user_id(hose_id, user_id)
+        like = LikeMapper.select_like_by_house_id_and_user_id(house_id, user_id)
         if like is not None:
             house.is_liked = True
         else:
             house.is_liked = False
         # 查询用户今天是否浏览，如果没有需要添加浏览记录
         nowStr = DateUtil.get_date_now()
-        view = ViewMapper.select_view_by_house_user_and_date(hose_id, user_id, nowStr)
+        view = ViewMapper.select_view_by_house_user_and_date(house_id, user_id, nowStr)
         if view is None:
             view = View()
-            view.house_id = house.hose_id
+            view.house_id = house.house_id
             view.user_id = user_id
             view.user_name = get_username()
             view.house_title = house.title
@@ -98,9 +98,9 @@ class HouseService:
             int: 插入的记录数
         """
         # 首先判断是否已存在
-        existing = HouseMapper.select_house_by_id(house.hose_id)
+        existing = HouseMapper.select_house_by_id(house.house_id)
         if existing is not None:
-            raise ServiceException(f"房源信息【{house.hose_id}】已存在")
+            raise ServiceException(f"房源信息【{house.house_id}】已存在")
         return HouseMapper.insert_house(house)
 
     @classmethod
@@ -117,7 +117,7 @@ class HouseService:
         return HouseMapper.update_house(house)
 
     @classmethod
-    def delete_house_by_ids(cls, ids: List[int]) -> int:
+    def delete_house_by_ids(cls, ids: List[str]) -> int:
         """
         批量删除房源信息
 
@@ -157,7 +157,7 @@ class HouseService:
 
                 # 检查关键字段是否为空，如果任何一个为空则跳过
                 key_fields = [
-                    house.hose_id,  # 房源编号
+                    house.house_id,  # 房源编号
                     house.house_code,  # 房源编码
                     house.title,  # 房源标题
                     house.community,  # 小区名称
@@ -173,12 +173,12 @@ class HouseService:
                     skip_count += 1
                     continue
 
-                display_value = getattr(house, "hose_id", f"第{index}条数据")
+                display_value = getattr(house, "house_id", f"第{index}条数据")
 
-                # 根据hose_id判断是更新还是新增
+                # 根据house_id判断是更新还是新增
                 existing = None
-                if house.hose_id is not None:
-                    existing = HouseMapper.select_house_by_id(house.hose_id)
+                if house.house_id is not None:
+                    existing = HouseMapper.select_house_by_id(house.house_id)
 
                 if existing:
                     # 更新现有数据

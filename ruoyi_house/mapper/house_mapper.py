@@ -32,8 +32,8 @@ class HouseMapper:
             stmt = select(HousePo)
 
 
-            if house.hose_id:
-                stmt = stmt.where(HousePo.hose_id.like("%" + str(house.hose_id) + "%"))
+            if house.house_id:
+                stmt = stmt.where(HousePo.house_id.like("%" + str(house.house_id) + "%"))
 
             if house.house_code:
                 stmt = stmt.where(HousePo.house_code.like("%" + str(house.house_code) + "%"))
@@ -99,18 +99,18 @@ class HouseMapper:
 
 
     @classmethod
-    def select_house_by_id(cls, hose_id: str) -> Optional[House]:
+    def select_house_by_id(cls, house_id: str) -> Optional[House]:
         """
         根据ID查询房源信息
 
         Args:
-            hose_id (int): 房源编号
+            house_id (int): 房源编号
 
         Returns:
             house: 房源信息对象
         """
         try:
-            result = db.session.get(HousePo, hose_id)
+            result = db.session.get(HousePo, house_id)
             return House.model_validate(result) if result else None
         except Exception as e:
             print(f"根据ID查询房源信息出错: {e}")
@@ -131,7 +131,7 @@ class HouseMapper:
         try:
             now = datetime.now()
             new_po = HousePo()
-            new_po.hose_id = house.hose_id
+            new_po.house_id = house.house_id
             new_po.house_code = house.house_code
             new_po.cover_image = house.cover_image
             new_po.title = house.title
@@ -159,7 +159,7 @@ class HouseMapper:
             new_po.property_type = house.property_type
             db.session.add(new_po)
             db.session.commit()
-            house.hose_id = new_po.hose_id
+            house.house_id = new_po.house_id
             return 1
         except Exception as e:
             db.session.rollback()
@@ -180,7 +180,7 @@ class HouseMapper:
         """
         try:
 
-            existing = db.session.get(HousePo, house.hose_id)
+            existing = db.session.get(HousePo, house.house_id)
             if not existing:
                 return 0
             now = datetime.now()
@@ -219,7 +219,7 @@ class HouseMapper:
             return 0
 
     @classmethod
-    def delete_house_by_ids(cls, ids: List[int]) -> int:
+    def delete_house_by_ids(cls, ids: List[str]) -> int:
         """
         批量删除房源信息
 
@@ -230,7 +230,7 @@ class HouseMapper:
             int: 删除的记录数
         """
         try:
-            stmt = delete(HousePo).where(HousePo.hose_id.in_(ids))
+            stmt = delete(HousePo).where(HousePo.house_id.in_(ids))
             result = db.session.execute(stmt)
             db.session.commit()
             return result.rowcount

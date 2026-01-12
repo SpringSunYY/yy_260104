@@ -16,7 +16,7 @@ class House(BaseEntity):
     房源信息对象
     """
     # 房源编号
-    hose_id: Annotated[
+    house_id: Annotated[
         Optional[str],
         Field(default=None, description="房源编号"),
         VoField(query=True),

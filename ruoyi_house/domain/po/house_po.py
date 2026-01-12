@@ -17,8 +17,8 @@ class HousePo(db.Model):
     """
     __tablename__ = 'tb_house'
     __table_args__ = {'comment': '房源信息'}
-    hose_id: Mapped[int] = mapped_column(
-        'hose_id',
+    house_id: Mapped[int] = mapped_column(
+        'house_id',
         String(255),
         primary_key=True,
         autoincrement=False,

@@ -192,7 +192,7 @@ class LikeMapper:
         根据 house_id 和 user_id 查询用户点赞
 
         Args:
-            hose_id (int): 房源ID
+            house_id (int): 房源ID
             user_id (int): 用户ID
 
         Returns:
