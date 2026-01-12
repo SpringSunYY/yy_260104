@@ -50,29 +50,29 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['house:view:add']"
-        >新增
-        </el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['house:view:edit']"
-        >修改
-        </el-button>
-      </el-col>
+<!--      <el-col :span="1.5">-->
+<!--        <el-button-->
+<!--          type="primary"-->
+<!--          plain-->
+<!--          icon="el-icon-plus"-->
+<!--          size="mini"-->
+<!--          @click="handleAdd"-->
+<!--          v-hasPermi="['house:view:add']"-->
+<!--        >新增-->
+<!--        </el-button>-->
+<!--      </el-col>-->
+<!--      <el-col :span="1.5">-->
+<!--        <el-button-->
+<!--          type="success"-->
+<!--          plain-->
+<!--          icon="el-icon-edit"-->
+<!--          size="mini"-->
+<!--          :disabled="single"-->
+<!--          @click="handleUpdate"-->
+<!--          v-hasPermi="['house:view:edit']"-->
+<!--        >修改-->
+<!--        </el-button>-->
+<!--      </el-col>-->
       <el-col :span="1.5">
         <el-button
           type="danger"
@@ -131,8 +131,20 @@
                        prop="houseType"/>
       <el-table-column label="朝向" align="center" :show-overflow-tooltip="true" v-if="columns[8].visible"
                        prop="orientation"/>
-      <el-table-column label="房源标签" align="center" :show-overflow-tooltip="true" v-if="columns[9].visible"
-                       prop="tags"/>
+      <el-table-column label="房源标签" align="center" :width="200" :show-overflow-tooltip="true" v-if="columns[9].visible"
+                       prop="tags">
+        <template slot-scope="scope">
+          <span v-if="scope.row.tags && scope.row.tags.trim() !== ''" style="">
+            <el-tag
+              v-for="(tag, index) in scope.row.tags.split(';').filter(item => item.trim() !== '')"
+              :key="index"
+              size="small">
+              {{ tag.trim() }}
+            </el-tag>
+          </span>
+          <span v-else>无</span>
+        </template>
+      </el-table-column>
       <el-table-column label="分数" align="center" :show-overflow-tooltip="true" v-if="columns[10].visible"
                        prop="score"/>
       <el-table-column label="创建时间" align="center" v-if="columns[11].visible" prop="createTime" width="180">
@@ -142,14 +154,14 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['house:view:edit']"
-          >修改
-          </el-button>
+<!--          <el-button-->
+<!--            size="mini"-->
+<!--            type="text"-->
+<!--            icon="el-icon-edit"-->
+<!--            @click="handleUpdate(scope.row)"-->
+<!--            v-hasPermi="['house:view:edit']"-->
+<!--          >修改-->
+<!--          </el-button>-->
           <el-button
             size="mini"
             type="text"
@@ -244,8 +256,8 @@ export default {
       viewList: [],
       // 表格列信息
       columns: [
-        {key: 0, label: '浏览编号', visible: true},
-        {key: 1, label: '用户', visible: true},
+        {key: 0, label: '浏览编号', visible: false},
+        {key: 1, label: '用户', visible: false},
         {key: 2, label: '用户名', visible: true},
         {key: 3, label: '房源编号', visible: true},
         {key: 4, label: '名称', visible: true},

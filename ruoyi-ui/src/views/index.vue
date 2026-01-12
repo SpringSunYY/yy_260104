@@ -21,7 +21,7 @@
             <span class="recommendations-title">为您推荐</span>
             <span class="recommendations-subtitle">基于您的喜好智能推荐</span>
           </div>
-          <router-link to="/house/query" class="view-more">
+          <router-link :to="{ name: 'HouseQuery' }" class="view-more">
             查看更多
             <i class="el-icon-arrow-right"></i>
           </router-link>
@@ -43,7 +43,7 @@
             :house="house"
           />
 
-          <!-- 加载状态 -->
+          <!-- 加载更多状态 -->
           <div v-if="loading && houseList.length > 0" class="loading-more">
             <el-icon class="is-loading">
               <Loading/>
@@ -60,10 +60,20 @@
           </div>
         </div>
 
+        <!-- 初始加载状态 -->
+        <div v-if="loading && houseList.length === 0" class="initial-loading">
+          <div class="loading-container">
+            <el-icon class="is-loading loading-icon">
+              <Loading/>
+            </el-icon>
+            <p class="loading-text">正在为您推荐房源...</p>
+          </div>
+        </div>
+
         <!-- 空状态 -->
         <div v-if="!loading && houseList.length === 0" class="empty-state">
           <el-empty description="暂无推荐房源，浏览一些房源后系统会为您推荐" :image-size="80">
-            <router-link to="/house/query">
+            <router-link :to="{ name: 'HouseQuery' }">
               <el-button type="primary">去浏览房源</el-button>
             </router-link>
           </el-empty>
@@ -435,6 +445,31 @@ export default {
 
       .no-more {
         color: #c0c4cc;
+      }
+    }
+
+    .initial-loading {
+      grid-column: 1 / -1;
+      padding: 64px 0;
+      text-align: center;
+
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+
+        .loading-icon {
+          font-size: 32px;
+          color: #409eff;
+        }
+
+        .loading-text {
+          font-size: 16px;
+          color: #606266;
+          margin: 0;
+          font-weight: 500;
+        }
       }
     }
 
