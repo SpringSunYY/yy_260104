@@ -1063,7 +1063,7 @@ class ExcelUtil:
     allowed_content_types = [
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     ]
-    max_content_length = 6 * 1024 * 1024  # 6M
+    max_content_length = 100 * 1024 * 1024  # 6M
 
     def __init__(self, model: Type[BaseModel]):
         self.model = model
