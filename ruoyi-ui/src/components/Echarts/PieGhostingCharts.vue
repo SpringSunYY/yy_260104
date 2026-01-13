@@ -69,14 +69,14 @@ export default {
     chartData: {
       deep: true,
       handler(newData) {
-        this.initChart(newData)
+        this.setOption(newData)
       }
     }
   },
 
   mounted() {
     this.$nextTick(() => {
-      this.initChart(this.chartData)
+      this.initChart()
       window.addEventListener('resize', this.handleResize)
     })
   },
@@ -93,16 +93,19 @@ export default {
     /**
      * 初始化图表
      */
-    initChart(data) {
-      if (!data || !data.length) {
-        return
-      }
+    initChart() {
       // 销毁已有实例
       if (this.chart) {
         this.chart.dispose()
         this.chart = null
       }
-
+      this.chart = echarts.init(this.$refs.chartRef);
+      this.setOption(this.chartData);
+    },
+    setOption(data) {
+      if (!data || !data.length) {
+        return
+      }
       const chartData = data
 
       // 2. 计算指标

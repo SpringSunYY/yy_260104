@@ -50,11 +50,26 @@
 
       <!-- 图表区域 -->
       <el-row :gutter="30">
-        <el-col :span="14">
+        <el-col :span="10">
           <div class="chart-wrapper">
             <PieGhostingCharts
               :chart-title="orientationModelName"
               :chart-data="orientationModelData"/>
+          </div>
+        </el-col>
+        <el-col :span="14">
+          <div class="chart-wrapper"></div>
+        </el-col>
+        <el-col :span="14">
+          <div class="chart-wrapper"></div>
+
+        </el-col>
+        <el-col :span="10">
+          <div class="chart-wrapper">
+            <PieRoundCharts
+            :chart-title="tagsModelName"
+            :chart-data="tagsModelData"
+            />
           </div>
         </el-col>
       </el-row>
@@ -66,11 +81,12 @@
 
 import {getRecommend} from "@/api/house/recommend";
 import PieGhostingCharts from "@/components/Echarts/PieGhostingCharts.vue";
+import PieRoundCharts from "@/components/Echarts/PieRoundCharts.vue";
 
 
 export default {
   name: "RecommendModel",
-  components: {PieGhostingCharts},
+  components: {PieRoundCharts, PieGhostingCharts},
   data() {
     return {
       recommend: {},
@@ -80,7 +96,10 @@ export default {
       weights: {},
       //房屋朝向
       orientationModelData: [],
-      orientationModelName: '房屋朝向'
+      orientationModelName: '房屋朝向模型',
+      //标签
+      tagsModelData: [],
+      tagsModelName: '标签模型',
     };
   },
   created() {
@@ -113,6 +132,9 @@ export default {
         }
         if (model.orientationModel) {
           this.orientationModelData = model.orientationModel
+        }
+        if (model.tagsModel) {
+          this.tagsModelData = model.tagsModel
         }
       });
     },
