@@ -48,14 +48,12 @@ export default {
 
 <style lang="scss" scoped>
 .app-container {
-  background-image: url("../../../assets/images/model-bg.png");
+  background-image: url("../../../assets/images/statistics-bg.png");
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  min-height: 92vh;
-  margin-top: -10px;
-  padding: 32px;
+  min-height: 100vh;
 }
 
 .content-wrapper {
