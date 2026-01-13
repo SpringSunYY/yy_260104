@@ -58,7 +58,12 @@
           </div>
         </el-col>
         <el-col :span="14">
-          <div class="chart-wrapper"></div>
+          <div class="chart-wrapper">
+            <ScatteGradientCharts
+            :chart-title="townModelName"
+            :chart-data="townModelData"
+            />
+          </div>
         </el-col>
         <el-col :span="14">
           <div class="chart-wrapper"></div>
@@ -67,8 +72,8 @@
         <el-col :span="10">
           <div class="chart-wrapper">
             <PieRoundCharts
-            :chart-title="tagsModelName"
-            :chart-data="tagsModelData"
+              :chart-title="tagsModelName"
+              :chart-data="tagsModelData"
             />
           </div>
         </el-col>
@@ -82,11 +87,12 @@
 import {getRecommend} from "@/api/house/recommend";
 import PieGhostingCharts from "@/components/Echarts/PieGhostingCharts.vue";
 import PieRoundCharts from "@/components/Echarts/PieRoundCharts.vue";
+import ScatterGradientCharts from "@/components/Echarts/ScatterGradientCharts.vue";
 
 
 export default {
   name: "RecommendModel",
-  components: {PieRoundCharts, PieGhostingCharts},
+  components: {ScatteGradientCharts: ScatterGradientCharts, PieRoundCharts, PieGhostingCharts},
   data() {
     return {
       recommend: {},
@@ -100,6 +106,9 @@ export default {
       //标签
       tagsModelData: [],
       tagsModelName: '标签模型',
+      //镇
+      townModelData: [],
+      townModelName: '镇模型',
     };
   },
   created() {
@@ -136,6 +145,9 @@ export default {
         if (model.tagsModel) {
           this.tagsModelData = model.tagsModel
         }
+        if (model.townModel) {
+          this.townModelData = model.townModel
+        }
       });
     },
   }
@@ -146,7 +158,7 @@ export default {
 .app-container {
   background-image: url("../../../assets/images/model-bg.png");
   background-repeat: no-repeat;
-  background-size: 100%;
+  background-size: cover;
   background-position: center;
   background-attachment: fixed;
   min-height: 92vh;
