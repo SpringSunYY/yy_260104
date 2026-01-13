@@ -59,15 +59,19 @@
         </el-col>
         <el-col :span="14">
           <div class="chart-wrapper">
-            <ScatteGradientCharts
+            <ScatterGradientCharts
             :chart-title="townModelName"
             :chart-data="townModelData"
             />
           </div>
         </el-col>
         <el-col :span="14">
-          <div class="chart-wrapper"></div>
-
+          <div class="chart-wrapper">
+            <ScatterRippleCharts
+              :chart-title="houseTypeModelName"
+              :chart-data="houseTypeModelData"
+            />
+          </div>
         </el-col>
         <el-col :span="10">
           <div class="chart-wrapper">
@@ -88,11 +92,12 @@ import {getRecommend} from "@/api/house/recommend";
 import PieGhostingCharts from "@/components/Echarts/PieGhostingCharts.vue";
 import PieRoundCharts from "@/components/Echarts/PieRoundCharts.vue";
 import ScatterGradientCharts from "@/components/Echarts/ScatterGradientCharts.vue";
+import ScatterRippleCharts from "@/components/Echarts/ScatterRippleCharts.vue";
 
 
 export default {
   name: "RecommendModel",
-  components: {ScatteGradientCharts: ScatterGradientCharts, PieRoundCharts, PieGhostingCharts},
+  components: {ScatterRippleCharts, ScatterGradientCharts, PieRoundCharts, PieGhostingCharts},
   data() {
     return {
       recommend: {},
@@ -109,6 +114,9 @@ export default {
       //镇
       townModelData: [],
       townModelName: '镇模型',
+      //房屋类型
+      houseTypeModelData: [],
+      houseTypeModelName: '房屋类型模型',
     };
   },
   created() {
@@ -147,6 +155,9 @@ export default {
         }
         if (model.townModel) {
           this.townModelData = model.townModel
+        }
+        if (model.houseTypeModel) {
+          this.houseTypeModelData = model.houseTypeModel
         }
       });
     },
