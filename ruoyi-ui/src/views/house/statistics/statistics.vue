@@ -10,7 +10,7 @@
         </el-col>
         <el-col :span="14">
           <div class="chart-wrapper">
-
+            <PieRoseHollowCharts/>
           </div>
         </el-col>
         <el-col :span="14">
@@ -32,10 +32,11 @@
 
 
 import PieRoseLineCharts from "@/components/Echarts/PieRoseLineCharts.vue";
+import PieRoseHollowCharts from "@/components/Echarts/PieRoseHollowCharts.vue";
 
 export default {
   name: "RecommendModel",
-  components: {PieRoseLineCharts},
+  components: {PieRoseHollowCharts, PieRoseLineCharts},
   data() {
     return {};
   },
