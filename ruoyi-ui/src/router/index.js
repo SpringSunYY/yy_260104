@@ -175,6 +175,13 @@ export const dynamicRoutes = [
         meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
       }
     ]
+  },
+  {
+    path: '/house/statistics',
+    name: 'Statistics',
+    component: () => import('@/views/house/statistics/statistics'),
+    hidden: true,
+    permissions: ['house:house:statistics']
   }
 ]
 
