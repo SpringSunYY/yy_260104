@@ -50,7 +50,13 @@
 
       <!-- 图表区域 -->
       <el-row :gutter="30">
-
+        <el-col :span="14">
+          <div class="chart-wrapper">
+            <PieGhostingCharts
+              :chart-title="orientationModelName"
+              :chart-data="orientationModelData"/>
+          </div>
+        </el-col>
       </el-row>
     </div>
   </div>
@@ -59,10 +65,12 @@
 <script>
 
 import {getRecommend} from "@/api/house/recommend";
+import PieGhostingCharts from "@/components/Echarts/PieGhostingCharts.vue";
 
 
 export default {
   name: "RecommendModel",
+  components: {PieGhostingCharts},
   data() {
     return {
       recommend: {},
@@ -70,7 +78,9 @@ export default {
 
       modelInfo: {},
       weights: {},
-
+      //房屋朝向
+      orientationModelData: [],
+      orientationModelName: '房屋朝向'
     };
   },
   created() {
@@ -94,10 +104,15 @@ export default {
         let modelInfo = {}
         if (this.recommend.modelInfo) {
           modelInfo = JSON.parse(this.recommend.modelInfo)
-          this.modelInfo = modelInfo
+          this.modelInfo = modelInfo.modelInfo
           this.weights = modelInfo.weights
-        } else {
-          return
+        }
+        let model = {}
+        if (modelInfo.modelInfo) {
+          model = modelInfo.modelInfo
+        }
+        if (model.orientationModel) {
+          this.orientationModelData = model.orientationModel
         }
       });
     },
