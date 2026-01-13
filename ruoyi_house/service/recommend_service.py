@@ -163,7 +163,7 @@ class RecommendService:
             LogUtil.logger.info(f"[判断推荐] 用户{user_id}推荐创建后新增点赞数: {like_count}")
 
             # 如果同时满足浏览了n条且点赞了n条，才需要重新生成推荐
-            should_generate = view_count >= cls.VIEW_NEW_RECORDS_COUNT and like_count >= cls.LIKE_NEW_RECORDS_COUNT
+            should_generate = view_count >= cls.VIEW_NEW_RECORDS_COUNT or like_count >= cls.LIKE_NEW_RECORDS_COUNT
             LogUtil.logger.info(
                 f"[判断推荐] 用户{user_id}是否需要重新生成推荐: {should_generate} (浏览{view_count}>={cls.VIEW_NEW_RECORDS_COUNT} 且 点赞{like_count}>={cls.LIKE_NEW_RECORDS_COUNT})")
 
