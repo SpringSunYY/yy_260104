@@ -7,7 +7,6 @@
 
 <script>
 import * as echarts from 'echarts';
-// 1. 引入本地东莞 JSON
 import dongguanGeoJson from './dongguan.json';
 
 export default {
@@ -17,7 +16,6 @@ export default {
     width: {type: String, default: '100%'},
     height: {type: String, default: '100%'},
     chartName: {type: String, default: '东莞市业务分布'},
-    // 4. 构造东莞本地测试数据
     chartData: {
       type: Array,
       default: () => [
@@ -51,7 +49,7 @@ export default {
   data() {
     return {
       chart: null,
-      selectedName: '', // 选中的镇街名
+      selectedName: '',
       resizeTimer: null,
     };
   },
@@ -85,9 +83,11 @@ export default {
     window.removeEventListener('resize', this.handleResize);
   },
   methods: {
-    // 3. 重置逻辑
     handleReset() {
       this.selectedName = '';
+      // 重置时取消地图的所有选中高亮状态
+      this.chart.dispatchAction({type: 'unselect', seriesIndex: 0});
+      this.chart.dispatchAction({type: 'downplay', seriesIndex: 0});
       this.$emit('mapClick', '');
       this.renderMap();
     },
@@ -119,7 +119,7 @@ export default {
           value: mainValue,
           ...dataValues
         };
-      }).sort((a, b) => a.value - b.value); // 柱形图需要排序
+      }).sort((a, b) => a.value - b.value);
 
       return {
         mapData: tmp,
@@ -137,8 +137,6 @@ export default {
       const {mapData, pointData} = this.getMapData();
       const values = mapData.map(d => d.value);
       const max = values.length ? Math.max(...values) : 1000;
-
-      // 柱形图数据
       const yCategories = mapData.map(d => d.name);
 
       const option = {
@@ -163,12 +161,11 @@ export default {
           textStyle: {color: '#fff'}
         },
         graphic: this.generateGraphicElements(),
-        // 侧边柱形图坐标系
         grid: {
-          right: '10%',          // 增加右边距给缩放条留位置
+          right: '10%',
           top: '15%',
           bottom: '30%',
-          width: '18%',          // 稍微调宽柱形图区域
+          width: '16%',
           containLabel: true
         },
         xAxis: {
@@ -184,35 +181,30 @@ export default {
         },
         dataZoom: [
           {
-            type: 'slider',      // 滑动条型
+            type: 'slider',
             show: true,
-            yAxisIndex: [0],     // 控制第一个 yAxis
-            right: '2%',         // 放在右侧边边缘
-            start: 70,           // 默认显示最后 30% 的数据（因为 y 轴通常是倒序或从小到大排列）
+            yAxisIndex: [0],
+            right: '2%',
+            start: 70,
             end: 100,
             width: 15,
             borderColor: 'rgba(0,0,0,0)',
-            fillerColor: 'rgba(17, 170, 254, 0.3)', // 滑块颜色
+            fillerColor: 'rgba(17, 170, 254, 0.3)',
             handleSize: '80%',
-            textStyle: { color: '#fff', fontSize: 10 }
+            textStyle: {color: '#fff', fontSize: 10}
           },
           {
-            type: 'inside',      // 内置型，支持在柱状图区域通过鼠标滚轮缩放
+            type: 'inside',
             yAxisIndex: [0],
             zoomOnMouseWheel: true,
             moveOnMouseMove: true
           }
         ],
-
         geo: {
           map: 'dongguan',
           roam: true,
-          layoutCenter: ['40%', '50%'], // 偏左一点，给柱状图留空间
-          // 限制缩放比例，防止缩放过快或过大找不到地图
-          scaleLimit: {
-            min: 1,
-            max: 5
-          },
+          layoutCenter: ['40%', '50%'],
+          scaleLimit: {min: 1, max: 5},
           layoutSize: '85%',
           label: {
             show: true,
@@ -230,8 +222,10 @@ export default {
             },
             emphasis: {areaColor: '#8dd7fc'}
           },
+          // 增加选中样式，确保联动时地图有颜色反馈
           select: {
-            itemStyle: {areaColor: '#f75a00'}
+            itemStyle: {areaColor: '#f75a00'},
+            label: {show: true, color: '#fff'}
           }
         },
         visualMap: {
@@ -250,9 +244,7 @@ export default {
             type: 'map',
             geoIndex: 0,
             data: mapData,
-            selectedMode: 'single',
-            animationDurationUpdate: 1000,
-            animationEasingUpdate: 'quinticInOut'
+            selectedMode: 'single' // 允许单选高亮
           },
           {
             name: '散点',
@@ -324,11 +316,19 @@ export default {
       echarts.registerMap('dongguan', dongguanGeoJson);
       this.renderMap();
 
-      // 2. 点击地图返回名字给父组件
       this.chart.on('click', (params) => {
         if (params.data) {
           this.selectedName = params.name;
           this.$emit('mapClick', this.selectedName);
+
+          // 核心逻辑：点击柱形图时，通过 dispatchAction 让地图同步高亮/选中
+          if (params.seriesType === 'bar') {
+            this.chart.dispatchAction({
+              type: 'select',
+              seriesIndex: 0,
+              name: params.name
+            });
+          }
         }
       });
     },
@@ -344,6 +344,7 @@ export default {
 </script>
 
 <style scoped>
+/* 样式完全保留，未做任何修改 */
 .chart-container {
   position: relative;
   width: 100%;

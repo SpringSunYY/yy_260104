@@ -20,7 +20,7 @@
         </el-col>
         <el-col :span="10">
           <div class="chart-wrapper">
-            <DongGuanMapCharts/>
+            <DongGuanMapCharts @mapClick="mapClick"/>
           </div>
         </el-col>
       </el-row>
@@ -44,7 +44,11 @@ export default {
   },
 
 
-  methods: {}
+  methods: {
+    mapClick(locationName){
+      console.log(locationName);
+    }
+  }
 };
 </script>
 
