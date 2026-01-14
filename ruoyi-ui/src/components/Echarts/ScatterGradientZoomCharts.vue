@@ -8,19 +8,9 @@ import * as echarts from 'echarts'
 export default {
   name: 'ScatterGradientZoomCharts',
   props: {
-    className: {
-      type: String,
-      default: 'chart'
-    },
-    width: {
-      type: String,
-      default: '100%'
-    },
-    height: {
-      type: String,
-      default: '100%'
-    },
-    // 原始数据
+    className: { type: String, default: 'chart' },
+    width: { type: String, default: '100%' },
+    height: { type: String, default: '100%' },
     chartData: {
       type: Array,
       default: () => [
@@ -46,19 +36,13 @@ export default {
         {name: '用户中心', value: 33, min: 780, max: 600, tooltipText: '单点登录协议SSO优化'}
       ]
     },
-    // 是否显示额外的统计信息（总计/平均）
-    showExtraInfo: {
-      type: Boolean,
-      default: false
-    },
-    chartTitle: {
-      type: String,
-      default: '业务数据分布统计'
-    },
-    backgroundColor: {
-      type: String,
-      default: 'transparent'
-    }
+    // --- 比例控制参数 ---
+    minSize: { type: Number, default: 0.06 }, // 最小气泡占容器短边的比例
+    maxSize: { type: Number, default: 0.25 }, // 最大气泡占容器短边的比例
+    // --- ---------------- ---
+    showExtraInfo: { type: Boolean, default: true },
+    chartTitle: { type: String, default: '业务数据分布统计' },
+    backgroundColor: { type: String, default: 'transparent' }
   },
 
   data() {
@@ -94,9 +78,6 @@ export default {
   },
 
   methods: {
-    /**
-     * 生成随机渐变色逻辑
-     */
     getDynamicGradient() {
       return new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
         offset: 0,
@@ -108,37 +89,49 @@ export default {
     },
 
     initChart() {
-      if (this.chart) {
-        this.chart.dispose()
-      }
+      if (this.chart) this.chart.dispose()
       this.chart = echarts.init(this.$refs.chartRef)
       this.setOption(this.chartData)
     },
 
     setOption(rawData) {
-      if (!rawData || rawData.length === 0) return
+      if (!rawData || rawData.length === 0 || !this.chart) return
 
       // 1. 计算统计数据
-      if (this.showExtraInfo) {
-        this.total = rawData.reduce((sum, item) => sum + item.value, 0)
-        this.avg = (this.total / rawData.length).toFixed(2)
-      }
+      this.total = rawData.reduce((sum, item) => sum + (item.value || 0), 0)
+      this.avg = (this.total / rawData.length).toFixed(2)
 
-      // 2. 数据处理：排序以确保层级，并处理重叠偏移
+      // 2. 获取容器尺寸，计算像素基准
+      const width = this.chart.getWidth()
+      const height = this.chart.getHeight()
+      const baseSize = Math.min(width, height)
+      const minPixel = baseSize * this.minSize
+      const maxPixel = baseSize * this.maxSize
+
+      // 3. 获取数据值范围用于线性映射
+      const values = rawData.map(d => d.value)
+      const maxVal = Math.max(...values)
+      const minVal = Math.min(...values)
+      const valDiff = (maxVal - minVal) || 1 // 防止除以0
+
+      // 4. 数据处理：排序以确保层级（大球在下，小球在上）
       const processedData = rawData
         .slice()
-        .sort((a, b) => b.value - a.value) // 大球在下，小球在上
+        .sort((a, b) => b.value - a.value)
         .map((item, index) => {
-          // 简单的重叠偏移逻辑：如果 max 和 min 完全一致，则产生微量偏移以便看见彼此
+          // 线性映射计算当前像素大小
+          const currentSymbolSize = minPixel + ((item.value - minVal) / valDiff) * (maxPixel - minPixel)
+
+          // 重叠偏移逻辑（保持原有逻辑）
           const isOverlap = rawData.some((other, i) =>
             i !== index && other.max === item.max && other.min === item.min
-          );
-          const offset = isOverlap ? (index * 2) : 0;
+          )
+          const offset = isOverlap ? (index * 2) : 0
 
           return {
             name: item.name,
-            // X轴为 max, Y轴为 min
             value: [item.max + offset, item.min + offset],
+            symbolSize: currentSymbolSize, // 核心优化：直接存储计算后的像素大小
             realValue: item.value,
             originMax: item.max,
             originMin: item.min,
@@ -147,9 +140,9 @@ export default {
               color: this.getDynamicGradient(),
               opacity: 0.8
             },
-            z: index + 1000 // 确保排序后的显示顺序
+            z: index + 1000
           }
-        });
+        })
 
       const option = {
         backgroundColor: this.backgroundColor,
@@ -197,9 +190,9 @@ export default {
           }
         ],
         grid: {
-          left: '8%',
-          right: '50px',
-          bottom: '80px',
+          left: '10%',
+          right: '5%',
+          bottom: '10%',
           containLabel: true
         },
         tooltip: {
@@ -211,19 +204,23 @@ export default {
           textStyle: {color: '#fff'},
           formatter: (params) => {
             const d = params.data;
-            let res = `<b style="color:#63bef8;font-size:15px;">${d.name}</b><br/>`;
-            res += `最大: ${d.originMax}<br/>`;
-            res += `最小: ${d.originMin}<br/>`;
-            res += `当前数值: ${d.realValue}<br/>`;
+            const percentage = ((d.realValue / this.total) * 100).toFixed(2);
+            let res = `<div style="padding:5px;">`;
+            res += `<b style="color:#63bef8;font-size:15px;">${d.name}</b><br/>`;
 
             if (this.showExtraInfo) {
-              res += `<hr style="border:none;border-top:1px solid #444;margin:5px 0;" />`;
-              res += `总计: ${this.total} | 平均: ${this.avg}<br/>`;
+              res += `<div style="color:#FFD700;margin:3px 0;border-bottom:1px solid #444;">
+                        总计: ${this.total} | 平均: ${this.avg}
+                      </div>`;
             }
 
+            res += `当前数值: <b>${d.realValue}</b> <small>(${percentage}%)</small><br/>`;
+            res += `最大值: ${d.originMax} | 最小值: ${d.originMin}`;
+
             if (d.tooltipText) {
-              res += `<div style="color:#aaa;font-size:12px;margin-top:5px;">${d.tooltipText.replace(/\n/g, '<br/>')}</div>`;
+              res += `<div style="color:#aaa;font-size:12px;margin-top:8px;line-height:1.4;">${d.tooltipText.replace(/\n/g, '<br/>')}</div>`;
             }
+            res += `</div>`;
             return res;
           }
         },
@@ -242,12 +239,8 @@ export default {
         series: [{
           type: 'scatter',
           data: processedData,
-          symbolSize: (val, params) => {
-            // 计算气泡大小：根据当前值占总值的比重
-            const currentTotal = this.showExtraInfo ? this.total : rawData.reduce((s, i) => s + i.value, 0);
-            const ratio = params.data.realValue / (currentTotal || 1);
-            return Math.sqrt(ratio) * 400 + 15; // 基础大小 15
-          },
+          // 直接从 data 项中取 symbolSize 字段
+          symbolSize: (val, params) => params.data.symbolSize,
           label: {
             show: true,
             formatter: '{b}',
@@ -255,15 +248,11 @@ export default {
             color: '#fff',
             fontSize: 10
           },
-          labelLayout: {hideOverlap: true},
+          labelLayout: { hideOverlap: true },
           emphasis: {
             focus: 'self',
-            scale: 1.4,
-            itemStyle: {
-              opacity: 1,
-              borderColor: '#fff',
-              borderWidth: 2
-            }
+            scale: 1.2,
+            itemStyle: { opacity: 1, borderColor: '#fff', borderWidth: 2 }
           }
         }]
       };
@@ -274,6 +263,7 @@ export default {
     handleResize() {
       if (this.chart) {
         this.chart.resize()
+        this.setOption(this.chartData)
       }
     }
   }

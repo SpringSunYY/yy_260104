@@ -9,38 +9,20 @@ import {generateRandomColor} from "@/utils/ruoyi";
 export default {
   name: 'ScatterRippleCharts',
   props: {
-    className: {
-      type: String,
-      default: 'chart'
-    },
-    width: {
-      type: String,
-      default: '100%'
-    },
-    height: {
-      type: String,
-      default: '100%'
-    },
-    chartTitle: {
-      type: String,
-      default: '人员构成分布'
-    },
+    className: {type: String, default: 'chart'},
+    width: {type: String, default: '100%'},
+    height: {type: String, default: '100%'},
+    chartTitle: {type: String, default: '人员构成分布'},
     chartData: {
       type: Array,
       default: () => [
-        {name: "电力热力", value: 130, tooltipText: "电力供应与热力生产"},
-        {name: "管理员", value: 80, tooltipText: "系统后台管理"},
-        {name: "医生", value: 110, tooltipText: "医疗诊断专家"},
-        {name: "护工", value: 600, tooltipText: "专业生活护理"},
-        {name: "护士", value: 95, tooltipText: "医疗护理服务"},
-        {name: "技师", value: 70, tooltipText: "技术支持"},
-        {name: "志愿者", value: 50, tooltipText: "社区服务"}
+        {name: "电力热力", value: 130, max: 150, min: 100, tooltipText: "电力供应与热力生产"},
+        {name: "管理员", value: 80, max: 100, min: 50},
+        {name: "护工", value: 600, max: 700, min: 400},
+        {name: "志愿者", value: 50}
       ]
     },
-    backgroundColor: {
-      type: String,
-      default: 'transparent'
-    },
+    backgroundColor: {type: String, default: 'transparent'},
     defaultColor: {
       type: Array,
       default: () => [
@@ -58,23 +40,20 @@ export default {
         '#F48FB1', '#F58AD9', '#E38CEB', '#FFD1E8'  // 樱粉系（情绪点缀）
       ]
     },
-    minBubbleSize: {
-      type: Number,
-      default: 70
-    },
-    maxBubbleSize: {
-      type: Number,
-      default: 130
-    }
-  }
-  ,
+    // 最小比例
+    minSize: {type: Number, default: 0.1},
+    // 最大比例
+    maxSize: {type: Number, default: 0.2},
+    // 是否显示额外统计信息
+    showExtraInfo: {type: Boolean, default: false}
+  },
   data() {
     return {
       chart: null,
-      totalSum: 0
+      totalSum: 0,
+      avgVal: 0 // 平均值
     };
-  }
-  ,
+  },
   watch: {
     chartData: {
       handler() {
@@ -82,54 +61,58 @@ export default {
       },
       deep: true
     }
-  }
-  ,
+  },
   mounted() {
     this.$nextTick(() => {
       this.initChart();
       window.addEventListener('resize', this.handleResize);
     });
-  }
-  ,
+  },
   beforeDestroy() {
     if (this.chart) {
       this.chart.dispose();
       this.chart = null;
     }
     window.removeEventListener('resize', this.handleResize);
-  }
-  ,
+  },
   methods: {
     /**
-     * 带碰撞检测的随机位置生成
+     * 带碰撞检测的随机位置生成（优化响应式尺寸）
      */
     generateBubbleData() {
+      if (!this.chart) return [];
+
       const datas = [];
       const maxVal = Math.max(...this.chartData.map(d => d.value));
 
-      this.chartData.forEach((item, index) => {
-        const currentSize = this.minBubbleSize + (item.value / maxVal) * (this.maxBubbleSize - this.minBubbleSize);
+      // 1. 根据容器大小计算像素尺寸
+      const chartW = this.chart.getWidth();
+      const chartH = this.chart.getHeight();
+      const baseSize = Math.min(chartW, chartH);
+      const minPixelSize = baseSize * this.minSize;
+      const maxPixelSize = baseSize * this.maxSize;
+
+      this.chartData.forEach((item) => {
+        // 根据比例映射实际像素大小
+        const currentSize = minPixelSize + (item.value / maxVal) * (maxPixelSize - minPixelSize);
 
         let x, y, isOverlap;
         let attempts = 0;
 
-        // 为每个气泡寻找一个不重叠的随机位置
         do {
           isOverlap = false;
-          // 随机坐标 (20% - 80% 之间，留出边缘避免切边)
           x = Math.floor(Math.random() * 60) + 20;
-          y = Math.floor(Math.random() * 60) + 20;
+          y = Math.floor(Math.random() * 60) + 30;
           attempts++;
 
-          // 碰撞检测：遍历已生成的点，确保圆心距离 > 两圆半径之和
           for (let i = 0; i < datas.length; i++) {
             const prev = datas[i];
             const dx = x - prev.value[0];
             const dy = y - prev.value[1];
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            // 映射到坐标系，给一个安全间距系数
-            const minDistance = (currentSize + prev.symbolSize) / 10;
+            // 安全间距：映射到坐标系（0-100）
+            const minDistance = (currentSize + prev.symbolSize) / (baseSize / 50);
             if (distance < minDistance) {
               isOverlap = true;
               break;
@@ -143,6 +126,8 @@ export default {
           symbolSize: currentSize,
           tooltipText: item.tooltipText || item.name,
           rawValue: item.value,
+          max: item.max, // 透传最大值
+          min: item.min, // 透传最小值
           itemStyle: {
             normal: {
               color: generateRandomColor(this.defaultColor),
@@ -153,26 +138,23 @@ export default {
           }
         });
       });
-
       return datas;
-    }
-    ,
+    },
 
-    /**
-     * 初始化图表
-     */
     initChart() {
       if (!this.$refs.chartRef) return;
-
-      if (this.chart) {
-        this.chart.dispose();
-      }
+      if (this.chart) this.chart.dispose();
       this.chart = echarts.init(this.$refs.chartRef);
       this.setOptions();
     },
+
     setOptions() {
-      // 计算总计
+      if (!this.chart) return;
+
+      // 1. 计算总计与平均值
+      const count = this.chartData.length;
       this.totalSum = this.chartData.reduce((sum, item) => sum + (item.value || 0), 0);
+      this.avgVal = count > 0 ? (this.totalSum / count).toFixed(2) : 0;
 
       const processedData = this.generateBubbleData();
 
@@ -185,8 +167,9 @@ export default {
           textStyle: {color: '#fff', fontSize: 20}
         },
         dataZoom: [
-          { type: 'inside', xAxisIndex: 0, minSpan: 60 },
-          { type: 'inside', yAxisIndex: 0, minSpan: 60 }
+          // X 轴内置缩放
+          {type: 'inside', xAxisIndex: 0, minSpan: 60},
+          {type: 'inside', yAxisIndex: 0, minSpan: 60},
         ],
         tooltip: {
           show: true,
@@ -195,49 +178,41 @@ export default {
           textStyle: {color: '#fff'},
           formatter: (params) => {
             const d = params.data;
-            console.log(d)
             const percentage = ((d.rawValue / this.totalSum) * 100).toFixed(2);
-            console.log(percentage)
-            let res = `<div style="line-height:22px;">
-                        <b style="color:#FFD700">总计: ${this.totalSum}</b><br/>
-                        ${d.name}: ${d.rawValue} (${percentage}%)`;
+
+            let res = `<div style="line-height:22px; padding: 5px;">`;
+
+            // 额外统计信息展示
+            if (this.showExtraInfo) {
+              res += `<div style="border-bottom: 1px solid #666; margin-bottom: 5px;">
+                        <b style="color:#FFD700">总计: ${this.totalSum}</b>&nbsp;&nbsp;
+                        <b style="color:#00FF7F">平均: ${this.avgVal}</b>
+                      </div>`;
+            }
+            res += `<b>${d.name}: ${d.rawValue}</b> <small>(${percentage}%)</small>`;
+            // 显式最大值/最小值
+            if (d.max !== undefined || d.min !== undefined) {
+              res += `<br/><span style="font-size:12px; color:#ccc;">范围: ${d.min ?? '-'} ~ ${d.max ?? '-'}</span>`;
+            }
             if (d.tooltipText) {
-              res += `<br/><span style="color:#00FFFF">${d.tooltipText}</span>`;
+              res += `<br/><span style="color:#00FFFF; font-size:12px;">${d.tooltipText}</span>`;
             }
             res += `</div>`;
             return res;
           }
         },
-        grid: {
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0
-        },
-        xAxis: {
-          type: 'value',
-          show: false,
-          min: 0,
-          max: 100
-        },
-        yAxis: {
-          type: 'value',
-          show: false,
-          min: 0,
-          max: 100
-        },
+        grid: {left: 0, right: 0, top: 0, bottom: 0},
+        xAxis: {type: 'value', show: false, min: 0, max: 100},
+        yAxis: {type: 'value', show: false, min: 0, max: 100},
         series: [{
           type: 'effectScatter',
           symbol: 'circle',
-          symbolSize: 120,
           label: {
             normal: {
               show: true,
               formatter: '{b}',
               color: '#fff',
-              textStyle: {
-                fontSize: '20'
-              }
+              textStyle: {fontSize: '14'} // 建议根据 baseSize 动态调整，或固定较小值
             }
           },
           data: processedData
@@ -250,6 +225,8 @@ export default {
     handleResize() {
       if (this.chart) {
         this.chart.resize();
+        // Resize 时重新计算气泡大小和位置，保持比例正确
+        this.setOptions();
       }
     }
   }
@@ -258,6 +235,7 @@ export default {
 
 <style scoped>
 .chart {
-  min-height: 400px;
+  width: 100%;
+  height: 100%;
 }
 </style>
