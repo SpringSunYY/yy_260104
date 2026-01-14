@@ -185,7 +185,7 @@ export default {
             show: true,
             yAxisIndex: [0],
             right: '2%',
-            start: 70,
+            start: 50,
             end: 100,
             width: 15,
             borderColor: 'rgba(0,0,0,0)',
