@@ -20,6 +20,11 @@
         </el-col>
         <el-col :span="10">
           <div class="chart-wrapper">
+            <BarTrendCharts/>
+          </div>
+        </el-col>
+        <el-col :span="10">
+          <div class="chart-wrapper">
             <DongGuanMapCharts @mapClick="mapClick"/>
           </div>
         </el-col>
@@ -35,17 +40,18 @@ import PieRoseLineCharts from "@/components/Echarts/PieRoseLineCharts.vue";
 import PieRoseHollowCharts from "@/components/Echarts/PieRoseHollowCharts.vue";
 import ScatterGradientZoomCharts from "@/components/Echarts/ScatterGradientZoomCharts.vue";
 import DongGuanMapCharts from "@/components/Echarts/DongGuan/DongGuanMapCharts.vue";
+import BarTrendCharts from "@/components/Echarts/BarTrendCharts.vue";
 
 export default {
   name: "RecommendModel",
-  components: {DongGuanMapCharts, ScatterGradientZoomCharts, PieRoseHollowCharts, PieRoseLineCharts},
+  components: {BarTrendCharts, DongGuanMapCharts, ScatterGradientZoomCharts, PieRoseHollowCharts, PieRoseLineCharts},
   data() {
     return {};
   },
 
 
   methods: {
-    mapClick(locationName){
+    mapClick(locationName) {
       console.log(locationName);
     }
   }
@@ -72,7 +78,7 @@ export default {
 
 
 .chart-wrapper {
-  height: 38vh;
+  height: 40vh;
 }
 
 @media (max-width: 768px) {
