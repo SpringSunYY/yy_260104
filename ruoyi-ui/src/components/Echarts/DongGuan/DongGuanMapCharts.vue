@@ -1,0 +1,373 @@
+<template>
+  <div class="chart-container">
+    <div :class="className" :style="{ height, width }" ref="chartRef"/>
+    <div class="back" @click="handleReset" v-show="selectedName">重置</div>
+  </div>
+</template>
+
+<script>
+import * as echarts from 'echarts';
+// 1. 引入本地东莞 JSON
+import dongguanGeoJson from './dongguan.json';
+
+export default {
+  name: 'DongGuanMapCharts',
+  props: {
+    className: {type: String, default: 'chart'},
+    width: {type: String, default: '100%'},
+    height: {type: String, default: '100%'},
+    chartName: {type: String, default: '东莞市业务分布'},
+    // 4. 构造东莞本地测试数据
+    chartData: {
+      type: Array,
+      default: () => [
+        {
+          name: "用户人数",
+          value: [
+            {location: "南城街道", value: 1200},
+            {location: "长安镇", value: 2500},
+            {location: "松山湖", value: 1800},
+            {location: "虎门镇", value: 2100},
+            {location: "东城街道", value: 1600},
+            {location: "厚街镇", value: 1400},
+            {location: "寮步镇", value: 1100}
+          ]
+        },
+        {
+          name: "用户登录数",
+          value: [
+            {location: "南城街道", value: 800},
+            {location: "长安镇", value: 1500},
+            {location: "松山湖", value: 1000}
+          ]
+        },
+      ]
+    },
+    defaultIndexName: {
+      type: String,
+      default: "用户人数"
+    },
+  },
+  data() {
+    return {
+      chart: null,
+      selectedName: '', // 选中的镇街名
+      resizeTimer: null,
+    };
+  },
+  computed: {
+    defaultDataItem() {
+      const index = this.chartData.findIndex(item => item.name === this.defaultIndexName);
+      return this.chartData[index >= 0 ? index : 0];
+    },
+    dataSummary() {
+      const summary = {};
+      this.chartData.forEach(dataItem => {
+        summary[dataItem.name] = dataItem.value.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+      });
+      return summary;
+    }
+  },
+  watch: {
+    chartData: {
+      handler() {
+        this.renderMap();
+      },
+      deep: true
+    }
+  },
+  mounted() {
+    this.initChart();
+    window.addEventListener('resize', this.handleResize);
+  },
+  beforeDestroy() {
+    if (this.chart) this.chart.dispose();
+    window.removeEventListener('resize', this.handleResize);
+  },
+  methods: {
+    // 3. 重置逻辑
+    handleReset() {
+      this.selectedName = '';
+      this.$emit('mapClick', '');
+      this.renderMap();
+    },
+
+    getDataValuesByLocation(locationName) {
+      const result = {};
+      this.chartData.forEach(dataItem => {
+        const locationData = dataItem.value.find(item =>
+          item.location === locationName ||
+          item.location.includes(locationName) ||
+          locationName.includes(item.location)
+        );
+        result[dataItem.name] = locationData ? locationData.value : 0;
+      });
+      return result;
+    },
+
+    getMapData() {
+      const features = dongguanGeoJson.features || [];
+      const tmp = features.map(feature => {
+        const {name, adcode, center} = feature.properties || {};
+        const dataValues = this.getDataValuesByLocation(name);
+        const mainValue = dataValues[this.defaultDataItem.name] || 0;
+
+        return {
+          name,
+          cityCode: adcode,
+          center,
+          value: mainValue,
+          ...dataValues
+        };
+      }).sort((a, b) => a.value - b.value); // 柱形图需要排序
+
+      return {
+        mapData: tmp,
+        pointData: tmp.map(item => ({
+          name: item.name,
+          value: [item.center?.[0] || 113.75, item.center?.[1] || 23.04, item.value],
+          ...item
+        }))
+      };
+    },
+
+    renderMap() {
+      if (!this.chart) return;
+
+      const {mapData, pointData} = this.getMapData();
+      const values = mapData.map(d => d.value);
+      const max = values.length ? Math.max(...values) : 1000;
+
+      // 柱形图数据
+      const yCategories = mapData.map(d => d.name);
+
+      const option = {
+        title: {
+          left: 'center',
+          top: 10,
+          text: this.chartName,
+          textStyle: {color: 'rgb(179, 239, 255)', fontSize: 16}
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: (params) => {
+            if (!params?.data) return '';
+            const d = params.data;
+            let content = `<div style="text-align:left">${d.name}<br/>`;
+            this.chartData.forEach(item => {
+              content += `${item.name}：${d[item.name] || 0} <br/>`;
+            });
+            return content + `</div>`;
+          },
+          backgroundColor: 'rgba(60, 60, 60, 0.7)',
+          textStyle: {color: '#fff'}
+        },
+        graphic: this.generateGraphicElements(),
+        // 侧边柱形图坐标系
+        grid: {
+          right: '10%',          // 增加右边距给缩放条留位置
+          top: '15%',
+          bottom: '30%',
+          width: '18%',          // 稍微调宽柱形图区域
+          containLabel: true
+        },
+        xAxis: {
+          type: 'value',
+          show: false
+        },
+        yAxis: {
+          type: 'category',
+          axisLine: {show: false},
+          axisTick: {show: false},
+          axisLabel: {textStyle: {color: '#c0e6f9', fontSize: 10}},
+          data: yCategories
+        },
+        dataZoom: [
+          {
+            type: 'slider',      // 滑动条型
+            show: true,
+            yAxisIndex: [0],     // 控制第一个 yAxis
+            right: '2%',         // 放在右侧边边缘
+            start: 70,           // 默认显示最后 30% 的数据（因为 y 轴通常是倒序或从小到大排列）
+            end: 100,
+            width: 15,
+            borderColor: 'rgba(0,0,0,0)',
+            fillerColor: 'rgba(17, 170, 254, 0.3)', // 滑块颜色
+            handleSize: '80%',
+            textStyle: { color: '#fff', fontSize: 10 }
+          },
+          {
+            type: 'inside',      // 内置型，支持在柱状图区域通过鼠标滚轮缩放
+            yAxisIndex: [0],
+            zoomOnMouseWheel: true,
+            moveOnMouseMove: true
+          }
+        ],
+
+        geo: {
+          map: 'dongguan',
+          roam: true,
+          layoutCenter: ['40%', '50%'], // 偏左一点，给柱状图留空间
+          // 限制缩放比例，防止缩放过快或过大找不到地图
+          scaleLimit: {
+            min: 1,
+            max: 5
+          },
+          layoutSize: '85%',
+          label: {
+            show: true,
+            color: 'rgb(249, 249, 249)',
+            fontSize: 10
+          },
+          itemStyle: {
+            normal: {
+              areaColor: '#24CFF4',
+              borderColor: '#53D9FF',
+              borderWidth: 1.3,
+              shadowBlur: 15,
+              shadowColor: 'rgb(58,115,192)',
+              shadowOffsetY: 6
+            },
+            emphasis: {areaColor: '#8dd7fc'}
+          },
+          select: {
+            itemStyle: {areaColor: '#f75a00'}
+          }
+        },
+        visualMap: {
+          min: 0,
+          max: max,
+          left: '3%',
+          bottom: '5%',
+          calculable: true,
+          seriesIndex: [0],
+          inRange: {color: ['#24CFF4', '#2E98CA', '#1E62AC']},
+          textStyle: {color: '#24CFF4'},
+        },
+        series: [
+          {
+            name: '地图',
+            type: 'map',
+            geoIndex: 0,
+            data: mapData,
+            selectedMode: 'single',
+            animationDurationUpdate: 1000,
+            animationEasingUpdate: 'quinticInOut'
+          },
+          {
+            name: '散点',
+            type: 'effectScatter',
+            coordinateSystem: 'geo',
+            rippleEffect: {brushType: 'fill'},
+            itemStyle: {color: '#F4E925', opacity: 0.8},
+            symbolSize: (val) => 5 + (val[2] / max) * 10,
+            data: pointData
+          },
+          {
+            name: '排行柱状图',
+            type: 'bar',
+            data: mapData,
+            barWidth: 8,
+            itemStyle: {
+              normal: {
+                color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                  {offset: 0, color: 'rgba(17, 170, 254, 0)'},
+                  {offset: 1, color: 'rgba(17, 170, 254, 1)'}
+                ]),
+                barBorderRadius: 4
+              }
+            },
+            label: {
+              show: true,
+              position: 'right',
+              color: '#fff',
+              fontSize: 10
+            }
+          }
+        ]
+      };
+
+      this.chart.setOption(option);
+    },
+
+    generateGraphicElements() {
+      const summaryEntries = Object.entries(this.dataSummary);
+      const lineHeight = 22;
+      const padding = 12;
+      const totalHeight = summaryEntries.length * lineHeight + padding * 2;
+      const textContent = summaryEntries.map(([name, total]) => `总${name}：${total}`).join('\n');
+
+      return [{
+        type: 'group',
+        right: 20,
+        bottom: 30,
+        children: [
+          {
+            type: 'rect',
+            shape: {width: 180, height: totalHeight, r: 4},
+            style: {fill: 'rgba(0,40,80,0.6)', stroke: '#00cfff', lineWidth: 1}
+          },
+          {
+            type: 'text',
+            style: {
+              text: textContent,
+              x: padding, y: padding,
+              fill: '#00f6ff', font: 'bold 13px Microsoft YaHei', lineHeight: lineHeight
+            }
+          }
+        ]
+      }];
+    },
+
+    initChart() {
+      this.chart = echarts.init(this.$refs.chartRef);
+      echarts.registerMap('dongguan', dongguanGeoJson);
+      this.renderMap();
+
+      // 2. 点击地图返回名字给父组件
+      this.chart.on('click', (params) => {
+        if (params.data) {
+          this.selectedName = params.name;
+          this.$emit('mapClick', this.selectedName);
+        }
+      });
+    },
+
+    handleResize() {
+      if (this.resizeTimer) clearTimeout(this.resizeTimer);
+      this.resizeTimer = setTimeout(() => {
+        this.chart && this.chart.resize();
+      }, 300);
+    }
+  }
+};
+</script>
+
+<style scoped>
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.back {
+  position: absolute;
+  left: 25px;
+  top: 25px;
+  color: rgb(179, 239, 255);
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 100;
+  border: 1px solid #53D9FF;
+  padding: 5px 15px;
+  border-radius: 4px;
+  background-color: rgba(36, 207, 244, 0.2);
+  backdrop-filter: blur(4px);
+  transition: all 0.3s;
+}
+
+.back:hover {
+  background-color: rgba(36, 207, 244, 0.5);
+  box-shadow: 0 0 10px rgba(83, 217, 255, 0.5);
+}
+</style>

@@ -20,7 +20,7 @@
         </el-col>
         <el-col :span="10">
           <div class="chart-wrapper">
-
+            <DongGuanMapCharts/>
           </div>
         </el-col>
       </el-row>
@@ -34,10 +34,11 @@
 import PieRoseLineCharts from "@/components/Echarts/PieRoseLineCharts.vue";
 import PieRoseHollowCharts from "@/components/Echarts/PieRoseHollowCharts.vue";
 import ScatterGradientZoomCharts from "@/components/Echarts/ScatterGradientZoomCharts.vue";
+import DongGuanMapCharts from "@/components/Echarts/DongGuan/DongGuanMapCharts.vue";
 
 export default {
   name: "RecommendModel",
-  components: {ScatterGradientZoomCharts, PieRoseHollowCharts, PieRoseLineCharts},
+  components: {DongGuanMapCharts, ScatterGradientZoomCharts, PieRoseHollowCharts, PieRoseLineCharts},
   data() {
     return {};
   },
