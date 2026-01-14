@@ -85,11 +85,35 @@ export default {
   methods: {
     handleReset() {
       this.selectedName = '';
-      // 重置时取消地图的所有选中高亮状态
-      this.chart.dispatchAction({type: 'unselect', seriesIndex: 0});
-      this.chart.dispatchAction({type: 'downplay', seriesIndex: 0});
-      this.$emit('mapClick', '');
+
+      // 首先取消所有选中状态
+      if (this.chart) {
+        try {
+          this.chart.clear(); // 清除之前的状态
+        } catch (e) {
+          console.warn('Clear chart state failed:', e);
+        }
+      }
+      // 重新渲染图表
       this.renderMap();
+      // 重新绑定事件监听器（因为 clear 后可能会丢失）
+      this.chart.off('click');
+      this.chart.on('click', (params) => {
+        if (params.data) {
+          this.selectedName = params.name;
+          this.$emit('mapClick', this.selectedName);
+
+          if (params.seriesType === 'bar') {
+            this.chart.dispatchAction({
+              type: 'select',
+              seriesIndex: 0,
+              name: params.name
+            });
+          }
+        }
+      });
+
+      this.$emit('mapClick', '');
     },
 
     getDataValuesByLocation(locationName) {
@@ -235,7 +259,7 @@ export default {
           bottom: '5%',
           calculable: true,
           seriesIndex: [0],
-          inRange: {color: ['#24CFF4', '#2E98CA', '#1E62AC']},
+          inRange: {color: ['rgba(123,232,255,0.4)', '#2E98CA', '#0059ff']},
           textStyle: {color: '#24CFF4'},
         },
         series: [
