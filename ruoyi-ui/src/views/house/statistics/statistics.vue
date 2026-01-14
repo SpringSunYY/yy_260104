@@ -15,7 +15,7 @@
         </el-col>
         <el-col :span="14">
           <div class="chart-wrapper">
-
+            <ScatterGradientZoomCharts/>
           </div>
         </el-col>
         <el-col :span="10">
@@ -33,10 +33,11 @@
 
 import PieRoseLineCharts from "@/components/Echarts/PieRoseLineCharts.vue";
 import PieRoseHollowCharts from "@/components/Echarts/PieRoseHollowCharts.vue";
+import ScatterGradientZoomCharts from "@/components/Echarts/ScatterGradientZoomCharts.vue";
 
 export default {
   name: "RecommendModel",
-  components: {PieRoseHollowCharts, PieRoseLineCharts},
+  components: {ScatterGradientZoomCharts, PieRoseHollowCharts, PieRoseLineCharts},
   data() {
     return {};
   },
@@ -54,6 +55,7 @@ export default {
   background-position: center;
   background-attachment: fixed;
   min-height: 100vh;
+  overflow-y: auto;
 }
 
 .content-wrapper {
