@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="content-wrapper">
       <!-- 图表区域 -->
-      <el-row :gutter="10">
+      <el-row :gutter="0">
         <el-col :span="6">
           <div class="chart-wrapper">
             <PieRoseLineCharts
@@ -120,20 +120,14 @@ export default {
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  min-height: 100vh;
+  max-height: 100vh;
   overflow-y: auto;
 }
 
-.content-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  height: 100%;
-}
 
 
 .chart-wrapper {
-  height: 33.3vh;
+  height: 33vh;
 }
 
 .chart-map-wrapper {
@@ -144,24 +138,4 @@ export default {
   height: 35vh;
 }
 
-@media (max-width: 768px) {
-  .app-container {
-    padding: 20px;
-  }
-
-  .header-section {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .page-title {
-    text-align: center;
-    margin-bottom: 16px;
-  }
-
-  .info-section {
-    flex-direction: column;
-  }
-
-}
 </style>
