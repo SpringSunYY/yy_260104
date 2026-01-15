@@ -139,18 +139,14 @@ export default {
                         ${item.name} 数据详情
                     </div>
                     <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                        <span>数值:</span>
+                        <b>数值:</b>
                         <span style="font-weight:bold;">${item.value} ${trendHtml}</span>
                     </div>
             `;
 
-            if (item.max !== undefined) {
-              html += `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; color:#aaa;">
-                        <span>范围:</span>
-                        <span>Min: ${item.min} / Max: ${item.max}</span>
-                    </div>`;
-            }
+            if (item.avg !== undefined) html += `<b>平均:</b> ${item.avg.toFixed(2)}<br/>`;
+            if (item.max !== undefined) html += `<b>最大:</b> ${item.max}<br/>`;
+            if (item.min !== undefined) html += `<b>最小:</b> ${item.min}<br/>`;
 
             if (this.showExtraInfo) {
               html += `

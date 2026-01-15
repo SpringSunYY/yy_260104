@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 from sqlalchemy import select, func
@@ -283,4 +284,83 @@ class HouseStatisticsMapper:
             return [StatisticsPo(**item) for item in result]
         except Exception as e:
             print(f"获取装修分析数据失败:{e}")
+            return []
+
+    @classmethod
+    def price_predict(cls, statistics_entity, start_year)-> List[StatisticsPo]:
+        """
+        价格预测
+        select
+            count(*) as value,
+            avg(unit_price) as avg,
+            max(unit_price) as max,
+            min(unit_price) as min,
+            building_year as name
+        from tb_house
+        where building_year > 2010
+        group by name
+        order by name desc
+        """
+        try:
+            # 构建查询条件
+            stmt = (select(
+                func.count("*").label("value"),
+                func.avg(HousePo.unit_price).label("avg"),
+                func.max(HousePo.unit_price).label("max"),
+                func.min(HousePo.unit_price).label("min"),
+                HousePo.building_year.label("name")
+            ).select_from(HousePo).group_by("name").order_by(db.desc("name")))
+            stmt = stmt.where(HousePo.building_year.isnot(None))
+            stmt = cls.builder_where(statistics_entity, stmt)
+            stmt = stmt.where(HousePo.building_year >= start_year)
+            result = db.session.execute(stmt).mappings().all()
+            if not result:
+                return []
+            return [StatisticsPo(**item) for item in result]
+        except Exception as e:
+            print(f"获取价格预测数据失败:{e}")
+            return []
+
+    @classmethod
+    def get_detailed_house_data(cls, statistics_entity, start_year):
+        """
+        获取详细的房源数据用于深度分析
+        返回每个房子的详细信息，而不是聚合数据
+        """
+        try:
+            # 获取原始房源数据
+            stmt = select(
+                HousePo.house_id,
+                HousePo.unit_price,
+                HousePo.total_price,
+                HousePo.building_year,
+                HousePo.area_size,
+                HousePo.house_type,
+                HousePo.orientation,
+                HousePo.floor,
+                HousePo.floor_type,
+                HousePo.decoration_type,
+                HousePo.community,
+                HousePo.town,
+                HousePo.area,
+                HousePo.property_right_type,
+                HousePo.tags
+            ).select_from(HousePo)
+
+            # 基本过滤条件
+            stmt = stmt.where(HousePo.building_year.isnot(None))
+            stmt = stmt.where(HousePo.unit_price.isnot(None))
+            stmt = stmt.where(HousePo.unit_price > 0)
+            stmt = stmt.where(HousePo.building_year >= start_year)
+
+            # 应用查询条件
+            stmt = cls.builder_where(statistics_entity, stmt)
+
+            # 按建筑年代排序
+            stmt = stmt.order_by(HousePo.building_year)
+
+            result = db.session.execute(stmt).mappings().all()
+            return result
+        except Exception as e:
+            print(f"获取详细房源数据失败:{e}")
             return []

@@ -120,3 +120,18 @@ def decoration_type_statistics(dto: HouseStatisticsRequest):
         if hasattr(statistics_entity, attr):
             setattr(statistics_entity, attr, getattr(dto, attr))
     return AjaxResponse.from_success(data=service.decoration_type_statistics(statistics_entity))
+
+
+"""价格预测"""
+@gen.route('/price_predict', methods=["GET"])
+@QueryValidator(is_page=True)
+@PreAuthorize(HasPerm('house:house:statistics'))
+@JsonSerializer()
+def price_predict(dto: HouseStatisticsRequest):
+    statistics_entity = HouseStatisticsRequest()
+    # 转换dto到Entity对象
+    for attr in dto.model_fields.keys():
+        if hasattr(statistics_entity, attr):
+            setattr(statistics_entity, attr, getattr(dto, attr))
+    # 使用详细数据分析进行预测
+    return AjaxResponse.from_success(data=service.price_predict_detailed(statistics_entity))

@@ -73,3 +73,13 @@ export function getDecorationTypeStatistics(params) {
     params: params
   })
 }
+
+
+//价格预测
+export function getPricePredictStatistics(params) {
+  return request({
+    url: '/house/statistics/price_predict',
+    method: 'get',
+    params: params
+  })
+}

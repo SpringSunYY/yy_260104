@@ -35,6 +35,7 @@
           <div class="chart-trend-wrapper">
             <BarTrendCharts
               :chart-title="pricePredictionName"
+              :chart-data="pricePredictionData"
             />
           </div>
         </el-col>
@@ -77,7 +78,7 @@ import {
   getCommunityStatistics, getDecorationTypeStatistics,
   getFloorTypeStatistics,
   getHouseTypeStatistics,
-  getOrientationStatistics,
+  getOrientationStatistics, getPricePredictStatistics,
   getPriceStatistics,
   getTagsStatistics,
   getTownStatistics
@@ -148,6 +149,7 @@ export default {
       this.getFloorTypeStatisticsData()
       this.getCommunityStatisticsData()
       this.getDecorationTypeStatisticsData()
+      this.getPricePredictionData()
     },
     //获取朝向
     getOrientationStatisticsData() {
@@ -189,6 +191,12 @@ export default {
     getDecorationTypeStatisticsData() {
       getDecorationTypeStatistics(this.statisticsParams).then(res => {
         this.decorationTypeStatisticsData = res.data;
+      });
+    },
+    //价格预测
+    getPricePredictionData() {
+      getPricePredictStatistics(this.statisticsParams).then(res => {
+        this.pricePredictionData = res.data;
       });
     },
     //获取镇
