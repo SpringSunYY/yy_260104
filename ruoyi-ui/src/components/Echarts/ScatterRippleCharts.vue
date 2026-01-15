@@ -188,9 +188,9 @@ export default {
             }
             res += `<b>${d.name}: ${d.rawValue}</b> <small>(${percentage}%)</small><br/>`;
             // 显式最大值/最小值
+            if (params.data.avg !== undefined) res += `<b>平均:</b> ${params.data.avg.toFixed(2)}<br/>`;
             if (params.data.max !== undefined) res += `<b>最大:</b> ${params.data.max}<br/>`;
             if (params.data.min !== undefined) res += `<b>最小:</b> ${params.data.min}<br/>`;
-            if (params.data.avg !== undefined) res += `<b>平均:</b> ${params.data.avg.toFixed(2)}<br/>`;
             if (d.tooltipText) {
               res += `<br/><span style="color:#00FFFF; font-size:12px;">${d.tooltipText}</span>`;
             }

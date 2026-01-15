@@ -63,3 +63,13 @@ export function getCommunityStatistics(params) {
     params: params
   })
 }
+
+
+//装修类型
+export function getDecorationTypeStatistics(params) {
+  return request({
+    url: '/house/statistics/decoration_type',
+    method: 'get',
+    params: params
+  })
+}

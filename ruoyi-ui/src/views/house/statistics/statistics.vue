@@ -51,7 +51,8 @@
           </div>
           <div class="chart-wrapper">
             <PieRoundCharts
-              :chart-title="decorationStatisticsName"/>
+              :chart-title="decorationTypeStatisticsName"
+              :chart-data="decorationTypeStatisticsData"/>
           </div>
         </el-col>
       </el-row>
@@ -72,7 +73,7 @@ import PieRoundCharts from "@/components/Echarts/PieRoundCharts.vue";
 import ScatterGradientCharts from "@/components/Echarts/ScatterGradientCharts.vue";
 import ScatterRippleCharts from "@/components/Echarts/ScatterRippleCharts.vue";
 import {
-  getCommunityStatistics,
+  getCommunityStatistics, getDecorationTypeStatistics,
   getFloorTypeStatistics,
   getHouseTypeStatistics,
   getOrientationStatistics,
@@ -96,8 +97,8 @@ export default {
       tagStatisticsData: [],
       tagStatisticsName: '标签分析',
       //装饰类型
-      decorationStatisticsData: [],
-      decorationStatisticsName: '装修分析',
+      decorationTypeStatisticsData: [],
+      decorationTypeStatisticsName: '装修分析',
       //价格
       priceStatisticsData: [],
       priceStatisticsName: '价格分析',
@@ -144,6 +145,7 @@ export default {
       this.getHouseTypeStatisticsData()
       this.getFloorTypeStatisticsData()
       this.getCommunityStatisticsData()
+      this.getDecorationTypeStatisticsData()
     },
     //获取朝向
     getOrientationStatisticsData() {
@@ -179,6 +181,12 @@ export default {
     getCommunityStatisticsData() {
       getCommunityStatistics(this.statisticsParams).then(res => {
         this.communityStatisticsData = res.data;
+      });
+    },
+    //装修类型
+    getDecorationTypeStatisticsData() {
+      getDecorationTypeStatistics(this.statisticsParams).then(res => {
+        this.decorationTypeStatisticsData = res.data;
       });
     },
     //获取镇

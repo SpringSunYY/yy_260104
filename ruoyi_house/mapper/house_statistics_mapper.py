@@ -251,3 +251,36 @@ class HouseStatisticsMapper:
         except Exception as e:
             print(f"获取小区分析数据失败:{e}")
             return []
+
+    @classmethod
+    def decoration_type_statistics(cls, statistics_entity)-> List[StatisticsPo]:
+        """
+        装修分析
+        select
+            count(*) as value,
+            avg(decoration_area) as avg,
+            max(decoration_area) as max,
+            min(decoration_area) as min,
+            decoration_type as name
+        from tb_house
+        group by name
+        order by value desc
+        """
+        try:
+            # 构建查询条件
+            stmt = select(
+                func.count("*").label("value"),
+                func.avg(HousePo.decoration_area).label("avg"),
+                func.max(HousePo.decoration_area).label("max"),
+                func.min(HousePo.decoration_area).label("min"),
+                HousePo.decoration_type.label("name")
+            ).select_from(HousePo).group_by("name").order_by(db.desc("value"))
+            stmt = stmt.where(HousePo.decoration_type.isnot(None))
+            stmt = cls.builder_where(statistics_entity, stmt)
+            result = db.session.execute(stmt).mappings().all()
+            if not result:
+                return []
+            return [StatisticsPo(**item) for item in result]
+        except Exception as e:
+            print(f"获取装修分析数据失败:{e}")
+            return []
