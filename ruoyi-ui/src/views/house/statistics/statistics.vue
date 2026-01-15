@@ -6,12 +6,13 @@
         <el-col :span="6">
           <div class="chart-wrapper">
             <PieRoseLineCharts
-              :chart-title="tagStatisticsName"
+              :chart-title="orientationStatisticsName"
+              :chart-data="orientationStatisticsData"
             />
           </div>
           <div class="chart-wrapper">
             <ScatterGradientCharts
-              :chart-title="decorationStatisticsName"
+              :chart-title="tagStatisticsName"
             />
           </div>
           <div class="chart-wrapper">
@@ -64,6 +65,7 @@ import PieGhostingCharts from "@/components/Echarts/PieGhostingCharts.vue";
 import PieRoundCharts from "@/components/Echarts/PieRoundCharts.vue";
 import ScatterGradientCharts from "@/components/Echarts/ScatterGradientCharts.vue";
 import ScatterRippleCharts from "@/components/Echarts/ScatterRippleCharts.vue";
+import {getOrientationStatistics} from "@/api/house/statistics";
 
 export default {
   name: "RecommendModel",
@@ -96,18 +98,32 @@ export default {
       houseTypeStatisticsData: [],
       houseTypeStatisticsName: '户型分析',
       //朝向
-      directionStatisticsData: [],
-      directionStatisticsName: '朝向分析',
+      orientationStatisticsData: [],
+      orientationStatisticsName: '朝向分析',
       //小区
       communityStatisticsData: [],
       communityStatisticsName: '小区分析',
+
+      statisticsParams: {}
     };
   },
 
-
+  created() {
+    this.getStatisticsData();
+  },
   methods: {
     mapClick(locationName) {
       console.log(locationName);
+    },
+    //获取统计
+    getStatisticsData() {
+      this.getOrientationStatisticsData()
+    },
+    //获取朝向
+    getOrientationStatisticsData() {
+      getOrientationStatistics(this.statisticsParams).then(res => {
+        this.orientationStatisticsData = res.data;
+      });
     }
   }
 };
@@ -123,7 +139,6 @@ export default {
   max-height: 100vh;
   overflow-y: auto;
 }
-
 
 
 .chart-wrapper {
