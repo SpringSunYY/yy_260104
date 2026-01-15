@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="content-wrapper">
       <!-- 图表区域 -->
-      <el-row :gutter="0">
+      <el-row style="padding: 0">
         <el-col :span="6">
           <div class="chart-wrapper">
             <PieRoseLineCharts
@@ -247,15 +247,16 @@ export default {
   background-attachment: fixed;
   max-height: 100vh;
   overflow-y: auto;
+  padding: 0;
 }
 
 
 .chart-wrapper {
-  height: 33vh;
+  height: 33.3vh;
 }
 
 .chart-map-wrapper {
-  height: 55vh;
+  height: 60vh;
 }
 
 .chart-trend-wrapper {

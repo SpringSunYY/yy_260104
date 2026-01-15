@@ -183,7 +183,7 @@ export default {
           left: 'center',
           top: 10,
           text: this.chartName,
-          textStyle: {color: 'rgb(179, 239, 255)', fontSize: 16}
+          textStyle: {color: 'rgb(179, 239, 255)', fontSize: 36}
         },
         tooltip: {
           trigger: 'item',
