@@ -168,8 +168,8 @@ export default {
         },
         dataZoom: [
           // X 轴内置缩放
-          {type: 'inside', xAxisIndex: 0, minSpan: 60},
-          {type: 'inside', yAxisIndex: 0, minSpan: 60},
+          {type: 'inside', xAxisIndex: 0, minSpan: 10},
+          {type: 'inside', yAxisIndex: 0, minSpan: 10},
         ],
         tooltip: {
           show: true,

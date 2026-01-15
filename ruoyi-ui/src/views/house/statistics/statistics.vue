@@ -45,6 +45,9 @@
           <div class="chart-wrapper">
             <ScatterRippleCharts
               :chart-title="houseTypeStatisticsName"
+              :chart-data="houseTypeStatisticsData"
+              :max-size="0.05"
+              :min-size="0.01"
             />
           </div>
           <div class="chart-wrapper">
@@ -70,6 +73,7 @@ import PieRoundCharts from "@/components/Echarts/PieRoundCharts.vue";
 import ScatterGradientCharts from "@/components/Echarts/ScatterGradientCharts.vue";
 import ScatterRippleCharts from "@/components/Echarts/ScatterRippleCharts.vue";
 import {
+  getHouseTypeStatistics,
   getOrientationStatistics,
   getPriceStatistics,
   getTagsStatistics,
@@ -133,6 +137,7 @@ export default {
       this.getOrientationStatisticsData()
       this.getPriceStatisticsData()
       this.getTagsStatisticsData()
+      this.getHouseTypeStatisticsData()
     },
     //获取朝向
     getOrientationStatisticsData() {
@@ -150,6 +155,12 @@ export default {
     getTagsStatisticsData() {
       getTagsStatistics(this.statisticsParams).then(res => {
         this.tagStatisticsData = res.data;
+      });
+    },
+    //户型
+    getHouseTypeStatisticsData() {
+      getHouseTypeStatistics(this.statisticsParams).then(res => {
+        this.houseTypeStatisticsData = res.data;
       });
     },
     //获取镇

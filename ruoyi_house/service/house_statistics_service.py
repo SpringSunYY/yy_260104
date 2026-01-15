@@ -191,3 +191,19 @@ class HouseStatisticsService:
         # 按出现次数降序排序
         statistics_list.sort(key=lambda x: x.value, reverse=True)
         return statistics_list
+
+    @classmethod
+    def house_type_statistics(cls, statistics_entity)-> List[StatisticsVo]:
+        """
+        获取房屋类型统计数据
+        """
+        pos = HouseStatisticsMapper.house_type_statistics(statistics_entity)
+        if not pos:
+            return []
+        return [StatisticsVo(
+            name=po.name,
+            value=po.value,
+            avg=po.avg,
+            max=po.max,
+            min=po.min
+        ) for po in pos]

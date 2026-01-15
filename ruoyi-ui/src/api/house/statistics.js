@@ -35,3 +35,12 @@ export function getTagsStatistics(params) {
     params: params
   })
 }
+
+//户型
+export function getHouseTypeStatistics(params) {
+  return request({
+    url: '/house/statistics/house_type',
+    method: 'get',
+    params: params
+  })
+}
