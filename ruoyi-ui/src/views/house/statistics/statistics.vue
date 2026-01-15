@@ -13,6 +13,7 @@
           <div class="chart-wrapper">
             <ScatterGradientCharts
               :chart-title="tagStatisticsName"
+              :chart-data="tagStatisticsData"
             />
           </div>
           <div class="chart-wrapper">
@@ -68,7 +69,12 @@ import PieGhostingCharts from "@/components/Echarts/PieGhostingCharts.vue";
 import PieRoundCharts from "@/components/Echarts/PieRoundCharts.vue";
 import ScatterGradientCharts from "@/components/Echarts/ScatterGradientCharts.vue";
 import ScatterRippleCharts from "@/components/Echarts/ScatterRippleCharts.vue";
-import {getOrientationStatistics, getPriceStatistics, getTownStatistics} from "@/api/house/statistics";
+import {
+  getOrientationStatistics,
+  getPriceStatistics,
+  getTagsStatistics,
+  getTownStatistics
+} from "@/api/house/statistics";
 
 export default {
   name: "RecommendModel",
@@ -126,6 +132,7 @@ export default {
     getStatisticsData() {
       this.getOrientationStatisticsData()
       this.getPriceStatisticsData()
+      this.getTagsStatisticsData()
     },
     //获取朝向
     getOrientationStatisticsData() {
@@ -137,6 +144,12 @@ export default {
     getPriceStatisticsData() {
       getPriceStatistics(this.statisticsParams).then(res => {
         this.priceStatisticsData = res.data;
+      });
+    },
+    //标签
+    getTagsStatisticsData() {
+      getTagsStatistics(this.statisticsParams).then(res => {
+        this.tagStatisticsData = res.data;
       });
     },
     //获取镇

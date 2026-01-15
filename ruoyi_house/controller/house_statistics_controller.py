@@ -50,3 +50,17 @@ def price_statistics(dto: HouseStatisticsRequest):
         if hasattr(statistics_entity, attr):
             setattr(statistics_entity, attr, getattr(dto, attr))
     return AjaxResponse.from_success(data=service.price_statistics(statistics_entity))
+
+
+"""标签分析"""
+@gen.route('/tags', methods=["GET"])
+@QueryValidator(is_page=True)
+@PreAuthorize(HasPerm('house:house:statistics'))
+@JsonSerializer()
+def tags_statistics(dto: HouseStatisticsRequest):
+    statistics_entity = HouseStatisticsRequest()
+    # 转换dto到Entity对象
+    for attr in dto.model_fields.keys():
+        if hasattr(statistics_entity, attr):
+            setattr(statistics_entity, attr, getattr(dto, attr))
+    return AjaxResponse.from_success(data=service.tags_statistics(statistics_entity))

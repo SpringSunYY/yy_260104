@@ -117,3 +117,36 @@ class HouseStatisticsMapper:
         except Exception as e:
             print(f"获取价格分析数据失败:{e}")
             return []
+
+    @classmethod
+    def tags_statistics(cls, statistics_entity):
+        """
+        标签分析
+        select
+            count(*) as value,
+            avg(unit_price) as avg,
+            max(unit_price) as max,
+            min(unit_price) as min,
+            tags as name
+        from tb_house
+        group by name
+        order by value desc;
+        """
+        try:
+            # 构建查询条件
+            stmt = select(
+                func.count("*").label("value"),
+                func.avg(HousePo.unit_price).label("avg"),
+                func.max(HousePo.unit_price).label("max"),
+                func.min(HousePo.unit_price).label("min"),
+                HousePo.tags.label("name")
+            ).select_from(HousePo).group_by("name").order_by(db.desc("value"))
+            stmt = stmt.where(HousePo.tags.isnot(None))
+            stmt = cls.builder_where(statistics_entity, stmt)
+            result = db.session.execute(stmt).mappings().all()
+            if not result:
+                return []
+            return [StatisticsPo(**item) for item in result]
+        except Exception as e:
+            print(f"获取标签分析数据失败:{e}")
+            return []

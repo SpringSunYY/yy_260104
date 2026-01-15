@@ -26,3 +26,12 @@ export function getPriceStatistics(params) {
     params: params
   })
 }
+
+//标签
+export function getTagsStatistics(params) {
+  return request({
+    url: '/house/statistics/tags',
+    method: 'get',
+    params: params
+  })
+}
