@@ -1,7 +1,7 @@
 {
   "name": "ruoyi",
   "version": "3.8.1",
-  "description": "东莞市二手房数据分析系统",
+  "description": "东莞市二手房数据分析平台",
   "author": "若依",
   "license": "MIT",
   "scripts": {

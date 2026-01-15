@@ -10,11 +10,12 @@ from typing import List, Optional, Dict, Tuple
 from ruoyi_common.exception import ServiceException
 from ruoyi_common.utils.base import LogUtil
 from ruoyi_common.utils.security_util import get_username
+from ruoyi_framework.descriptor.datascope import DataScope
 from ruoyi_house.domain.entity import Recommend, House, Like, View
 from ruoyi_house.mapper import LikeMapper, ViewMapper
 from ruoyi_house.mapper.house_mapper import HouseMapper
 from ruoyi_house.mapper.recommend_mapper import RecommendMapper
-
+from ruoyi_house.service import HouseService
 
 class RecommendService:
     """用户推荐服务类"""
@@ -291,7 +292,6 @@ class RecommendService:
         Returns:
             Tuple[List[House], int]: (房源列表, 总数)
         """
-        from ruoyi_house.service.house_service import HouseService
 
         # 直接查询用户的最新推荐记录
         latest_recommend = RecommendMapper.select_latest_recommend_by_user_id(user_id)
@@ -920,6 +920,7 @@ class RecommendService:
         return result[:top_n]
 
     @classmethod
+    @DataScope(dept=True, user=True)
     def select_recommend_list(cls, recommend: Recommend) -> List[Recommend]:
         """
         查询用户推荐列表

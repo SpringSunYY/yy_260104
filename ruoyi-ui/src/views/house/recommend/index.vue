@@ -106,7 +106,13 @@
         </template>
       </el-table-column>
       <el-table-column label="推荐内容" align="center" :show-overflow-tooltip="true" v-if="columns[4].visible"
-                       prop="content"/>
+                       prop="content">
+        <template slot-scope="scope">
+          <router-link :to="{name:'Index'}" cclass="link-type">
+            查看推荐
+          </router-link>
+        </template>
+      </el-table-column>
       <el-table-column label="创建时间" align="center" :show-overflow-tooltip="true" v-if="columns[5].visible"
                        prop="createTime"/>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">

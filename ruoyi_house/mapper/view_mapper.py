@@ -38,7 +38,8 @@ class ViewMapper:
 
             if view.user_name:
                 stmt = stmt.where(ViewPo.user_name.like("%" + str(view.user_name) + "%"))
-
+            if view.user_id is not None:
+                stmt = stmt.where(ViewPo.user_id == view.user_id)
             if view.house_title:
                 stmt = stmt.where(ViewPo.house_title.like("%" + str(view.house_title) + "%"))
 
@@ -54,6 +55,12 @@ class ViewMapper:
                 stmt = stmt.where(ViewPo.create_time <= end_val)
             if "criterian_meta" in g and g.criterian_meta.page:
                 g.criterian_meta.page.stmt = stmt
+                # 应用数据范围过滤（如果 DataScope 设置了有效的过滤条件）
+            if ("criterian_meta" in g and
+                    g.criterian_meta.scope is not None and
+                    g.criterian_meta.scope != [] and
+                    g.criterian_meta.scope != ()):
+                stmt = stmt.where(g.criterian_meta.scope)
             stmt = stmt.order_by(ViewPo.create_time.desc())
             result = db.session.execute(stmt).scalars().all()
             return [View.model_validate(item) for item in result] if result else []

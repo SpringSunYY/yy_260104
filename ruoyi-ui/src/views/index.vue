@@ -5,7 +5,7 @@
       <div class="header-container">
         <h1 class="page-title">
           <i class="el-icon-house"></i>
-          欢迎使用东莞市二手房平台
+          欢迎使用东莞市二手房数据分析平台
         </h1>
         <p class="page-subtitle">发现您的理想家园，我们为您推荐最适合的房源</p>
       </div>

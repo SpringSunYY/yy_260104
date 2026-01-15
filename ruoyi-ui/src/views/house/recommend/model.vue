@@ -140,7 +140,7 @@ export default {
         let modelInfo = {}
         if (this.recommend.modelInfo) {
           modelInfo = JSON.parse(this.recommend.modelInfo)
-          this.modelInfo = modelInfo.modelInfo
+          this.modelInfo = modelInfo
           this.weights = modelInfo.weights
         }
         let model = {}

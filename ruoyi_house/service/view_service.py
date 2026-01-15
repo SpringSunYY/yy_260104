@@ -7,12 +7,15 @@ from typing import List, Optional
 
 from ruoyi_common.exception import ServiceException
 from ruoyi_common.utils.base import LogUtil
+from ruoyi_framework.descriptor.datascope import DataScope
 from ruoyi_house.domain.entity import View
 from ruoyi_house.mapper.view_mapper import ViewMapper
+
 
 class ViewService:
     """用户浏览服务类"""
     @classmethod
+    @DataScope(dept=True, user=True)
     def select_view_list(cls, view: View) -> List[View]:
         """
         查询用户浏览列表
@@ -25,7 +28,7 @@ class ViewService:
         """
         return ViewMapper.select_view_list(view)
 
-    
+
     @classmethod
     def select_view_by_id(cls, id: int) -> Optional[View]:
         """
@@ -38,7 +41,7 @@ class ViewService:
             view: 用户浏览对象
         """
         return ViewMapper.select_view_by_id(id)
-    
+
     @classmethod
     def insert_view(cls, view: View) -> int:
         """
@@ -52,7 +55,7 @@ class ViewService:
         """
         return ViewMapper.insert_view(view)
 
-    
+
     @classmethod
     def update_view(cls, view: View) -> int:
         """
@@ -65,9 +68,9 @@ class ViewService:
             int: 更新的记录数
         """
         return ViewMapper.update_view(view)
-    
 
-    
+
+
     @classmethod
     def delete_view_by_ids(cls, ids: List[int]) -> int:
         """
@@ -80,7 +83,7 @@ class ViewService:
             int: 删除的记录数
         """
         return ViewMapper.delete_view_by_ids(ids)
-    
+
     @classmethod
     def import_view(cls, view_list: List[View], is_update: bool = False) -> str:
         """
@@ -104,7 +107,7 @@ class ViewService:
         for view in view_list:
             try:
                 display_value = view
-                
+
                 display_value = getattr(view, "id", display_value)
                 existing = None
                 if view.id is not None:
@@ -118,7 +121,7 @@ class ViewService:
                         continue
                 else:
                     result = ViewMapper.insert_view(view)
-                
+
                 if result > 0:
                     success_count += 1
                     success_msg += f"<br/> 第{success_count}条数据，操作成功：{display_value}"

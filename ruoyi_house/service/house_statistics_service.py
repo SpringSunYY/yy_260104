@@ -355,7 +355,7 @@ class HouseStatisticsService:
             yearly_stats = cls._analyze_yearly_detailed_data(detailed_data)
 
             # 确保包含所有年份，即使某些年份没有数据
-            complete_yearly_stats = cls._ensure_complete_years(yearly_stats, start_year)
+            complete_yearly_stats = cls._ensure_complete_years(yearly_stats, start_year, predict_year)
 
             pos = []
             for year, stats in complete_yearly_stats.items():
@@ -410,7 +410,7 @@ class HouseStatisticsService:
             if predict_year_str:
                 predict_year = int(predict_year_str)
         except ValueError:
-            start_year = 10
+            start_year = 2010
             predict_year = 10
         pos = HouseStatisticsMapper.price_predict(statistics_entity,start_year)
         if not pos:
@@ -944,13 +944,14 @@ class HouseStatisticsService:
         return filtered_stats
 
     @classmethod
-    def _ensure_complete_years(cls, yearly_stats, start_year):
+    def _ensure_complete_years(cls, yearly_stats, start_year, predict_year):
         """
         确保所有年份都有数据，包括没有房源数据的年份和预测年份
 
         Args:
             yearly_stats: 实际查询到的年份统计数据
             start_year: 开始年份
+            predict_year: 预测年数
 
         Returns:
             包含所有年份的完整统计数据
@@ -967,7 +968,7 @@ class HouseStatisticsService:
         # 创建连续的年份列表（包括预测年份）
         complete_stats = {}
 
-        # 历史年份（包括缺失的年份）
+        # 只填充历史年份（包括缺失的年份），不填充预测年份
         for year in range(start_year, current_year + 1):
             if year in yearly_stats and yearly_stats[year]['count'] > 0:
                 complete_stats[year] = yearly_stats[year]

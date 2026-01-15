@@ -14,7 +14,7 @@ from ruoyi_common.descriptor.validator import QueryValidator, BodyValidator, Pat
 from ruoyi_common.domain.enum import BusinessType
 from ruoyi_common.utils.base import ExcelUtil
 from ruoyi_framework.descriptor.log import Log
-from ruoyi_framework.descriptor.permission import HasPerm, PreAuthorize
+from ruoyi_framework.descriptor.permission import HasPerm, PreAuthorize, AnyPerm
 from ruoyi_house.controller import house as house_bp
 from ruoyi_house.domain.entity import House
 from ruoyi_house.service.house_service import HouseService
@@ -32,7 +32,7 @@ def _clear_page_context():
 
 @gen.route('/list', methods=["GET"])
 @QueryValidator(is_page=True)
-@PreAuthorize(HasPerm('house:house:list'))
+@PreAuthorize(AnyPerm('house:house:list,house:house:query'))
 @JsonSerializer()
 def house_list(dto: House):
     """查询房源信息列表"""

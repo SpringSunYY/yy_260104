@@ -35,7 +35,7 @@ export default {
   },
   data() {
     return {
-      title: '东莞市二手房数据分析系统',
+      title: '东莞市二手房数据分析平台',
       logo: logoImg
     }
   }

@@ -37,7 +37,8 @@ class LikeMapper:
 
             if like.user_name:
                 stmt = stmt.where(LikePo.user_name.like("%" + str(like.user_name) + "%"))
-
+            if like.user_id:
+                stmt = stmt.where(LikePo.user_id == like.user_id)
             if like.house_title:
                 stmt = stmt.where(LikePo.house_title.like("%" + str(like.house_title) + "%"))
 
@@ -53,6 +54,12 @@ class LikeMapper:
                 stmt = stmt.where(LikePo.create_time <= end_val)
             if "criterian_meta" in g and g.criterian_meta.page:
                 g.criterian_meta.page.stmt = stmt
+                # 应用数据范围过滤（如果 DataScope 设置了有效的过滤条件）
+            if ("criterian_meta" in g and
+                    g.criterian_meta.scope is not None and
+                    g.criterian_meta.scope != [] and
+                    g.criterian_meta.scope != ()):
+                stmt = stmt.where(g.criterian_meta.scope)
             stmt = stmt.order_by(LikePo.create_time.desc())
             result = db.session.execute(stmt).scalars().all()
             return [Like.model_validate(item) for item in result] if result else []

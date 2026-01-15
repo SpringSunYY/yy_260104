@@ -8,16 +8,18 @@ from typing import List, Optional
 from ruoyi_common.exception import ServiceException
 from ruoyi_common.utils.base import LogUtil
 from ruoyi_common.utils.security_util import get_user_id, get_username
+from ruoyi_framework.descriptor.datascope import DataScope
 from ruoyi_house.domain.entity import Like
 from ruoyi_house.mapper import HouseMapper
 from ruoyi_house.mapper.like_mapper import LikeMapper
-from ruoyi_house.service import HouseService
+
 
 
 class LikeService:
     """用户点赞服务类"""
 
     @classmethod
+    @DataScope(dept=True, user=True)
     def select_like_list(cls, like: Like) -> List[Like]:
         """
         查询用户点赞列表
