@@ -13,7 +13,7 @@ service = HouseStatisticsService()
 """朝向分析"""
 @gen.route('/orientation', methods=["GET"])
 @QueryValidator(is_page=True)
-@PreAuthorize(HasPerm('house:like:list'))
+@PreAuthorize(HasPerm('house:house:statistics'))
 @JsonSerializer()
 def orientation_statistics(dto: HouseStatisticsRequest):
     statistics_entity = HouseStatisticsRequest()
@@ -22,3 +22,17 @@ def orientation_statistics(dto: HouseStatisticsRequest):
         if hasattr(statistics_entity, attr):
             setattr(statistics_entity, attr, getattr(dto, attr))
     return AjaxResponse.from_success(data=service.orientation_statistics(statistics_entity))
+
+
+"""镇分析"""
+@gen.route('/town', methods=["GET"])
+@QueryValidator(is_page=True)
+@PreAuthorize(HasPerm('house:house:statistics'))
+@JsonSerializer()
+def town_statistics(dto: HouseStatisticsRequest):
+    statistics_entity = HouseStatisticsRequest()
+    # 转换dto到Entity对象
+    for attr in dto.model_fields.keys():
+        if hasattr(statistics_entity, attr):
+            setattr(statistics_entity, attr, getattr(dto, attr))
+    return AjaxResponse.from_success(data=service.town_statistics(statistics_entity))

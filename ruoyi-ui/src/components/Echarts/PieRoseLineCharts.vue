@@ -119,7 +119,7 @@ export default {
     setOption(data) {
       if (!data || !data.length) return;
 
-      const total = data.reduce((sum, item) => sum + Number(item.value), 0).toFixed(2);
+      const total = data.reduce((sum, item) => sum + Number(item.value), 0);
       const avg = (total / data.length).toFixed(2);
 
       // 为每个数据项生成样式
@@ -170,6 +170,7 @@ export default {
             }
             if (params.data.max !== undefined) res += `<b>最大:</b> ${params.data.max}<br/>`;
             if (params.data.min !== undefined) res += `<b>最小:</b> ${params.data.min}<br/>`;
+            if (params.data.avg !== undefined) res += `<b>平均:</b> ${params.data.avg.toFixed(2)}<br/>`;
             return res;
           }
         },

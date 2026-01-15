@@ -25,6 +25,8 @@
           <div class="chart-map-wrapper">
             <DongGuanMapCharts
               :chart-name="townStatisticsName"
+              :chart-data="townStatisticsData"
+              :default-index-name="defaultIndexName"
               @mapClick="mapClick"/>
           </div>
           <div class="chart-trend-wrapper">
@@ -65,7 +67,7 @@ import PieGhostingCharts from "@/components/Echarts/PieGhostingCharts.vue";
 import PieRoundCharts from "@/components/Echarts/PieRoundCharts.vue";
 import ScatterGradientCharts from "@/components/Echarts/ScatterGradientCharts.vue";
 import ScatterRippleCharts from "@/components/Echarts/ScatterRippleCharts.vue";
-import {getOrientationStatistics} from "@/api/house/statistics";
+import {getOrientationStatistics, getTownStatistics} from "@/api/house/statistics";
 
 export default {
   name: "RecommendModel",
@@ -91,6 +93,7 @@ export default {
       //镇
       townStatisticsData: [],
       townStatisticsName: '东莞市二手房数据分析',
+      defaultIndexName: '总房源数',
       //价格预测
       pricePredictionData: [],
       pricePredictionName: '价格预测',
@@ -109,11 +112,14 @@ export default {
   },
 
   created() {
+    this.getTownStatisticsData()
     this.getStatisticsData();
   },
   methods: {
     mapClick(locationName) {
       console.log(locationName);
+      this.statisticsParams.town = locationName
+      this.getStatisticsData()
     },
     //获取统计
     getStatisticsData() {
@@ -123,6 +129,41 @@ export default {
     getOrientationStatisticsData() {
       getOrientationStatistics(this.statisticsParams).then(res => {
         this.orientationStatisticsData = res.data;
+      });
+    },
+    //获取镇
+    getTownStatisticsData() {
+      getTownStatistics(this.statisticsParams).then(res => {
+        const data = res.data;
+        let valueValues = []
+        let avgValues = []
+        let maxValues = []
+        let minValues = []
+        for (let i = 0; i < data.length; i++) {
+          let name = data[i].name
+          valueValues.push({location: name, value: data[i].value})
+          avgValues.push({location: name, value: data[i].avg.toFixed(2)})
+          maxValues.push({location: name, value: data[i].max})
+          minValues.push({location: name, value: data[i].min})
+        }
+        this.townStatisticsData = []
+        this.townStatisticsData.push({
+          name: "总房源数",
+          value: valueValues
+        })
+        this.townStatisticsData.push({
+          name: "平均价格",
+          value: avgValues
+        })
+        this.townStatisticsData.push({
+          name: "最高价格",
+          value: maxValues
+        })
+        this.townStatisticsData.push({
+          name: "最低价格",
+          value: minValues
+        })
+        console.log(this.townStatisticsData)
       });
     }
   }

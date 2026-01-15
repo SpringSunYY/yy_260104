@@ -8,3 +8,12 @@ export function getOrientationStatistics(params) {
     params: params
   })
 }
+
+//镇
+export function getTownStatistics(params) {
+  return request({
+    url: '/house/statistics/town',
+    method: 'get',
+    params: params
+  })
+}

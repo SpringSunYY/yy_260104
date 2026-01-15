@@ -55,13 +55,21 @@ export default {
   },
   computed: {
     defaultDataItem() {
+      if (!this.chartData || !Array.isArray(this.chartData) || this.chartData.length === 0) {
+        return null;
+      }
       const index = this.chartData.findIndex(item => item.name === this.defaultIndexName);
-      return this.chartData[index >= 0 ? index : 0];
+      return this.chartData[index >= 0 ? index : 0] || null;
     },
     dataSummary() {
       const summary = {};
+      if (!this.chartData || !Array.isArray(this.chartData)) {
+        return summary;
+      }
       this.chartData.forEach(dataItem => {
-        summary[dataItem.name] = dataItem.value.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+        if (dataItem && dataItem.name && Array.isArray(dataItem.value)) {
+          summary[dataItem.name] = dataItem.value.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+        }
       });
       return summary;
     }
@@ -134,7 +142,7 @@ export default {
       const tmp = features.map(feature => {
         const {name, adcode, center} = feature.properties || {};
         const dataValues = this.getDataValuesByLocation(name);
-        const mainValue = dataValues[this.defaultDataItem.name] || 0;
+        const mainValue = (this.defaultDataItem && dataValues[this.defaultDataItem.name]) || 0;
 
         return {
           name,
@@ -156,7 +164,7 @@ export default {
     },
 
     renderMap() {
-      if (!this.chart) return;
+      if (!this.chart || !this.chartData || !this.defaultDataItem) return;
 
       const {mapData, pointData} = this.getMapData();
       const values = mapData.map(d => d.value);
@@ -307,6 +315,9 @@ export default {
     },
 
     generateGraphicElements() {
+      if (!this.chartData || !Array.isArray(this.chartData) || this.chartData.length === 0) {
+        return [];
+      }
       const summaryEntries = Object.entries(this.dataSummary);
       const lineHeight = 22;
       const padding = 12;
