@@ -158,7 +158,7 @@ class HouseStatisticsService:
                         'count': 0,  # 标签出现次数
                         'total_avg': 0,  # 平均价格总和
                         'max_list': [],  # 存储所有最大价格
-                        'min_list': []   # 存储所有最小价格
+                        'min_list': []  # 存储所有最小价格
                     }
 
                 tag_stats[tag]['count'] += count_value
@@ -185,7 +185,7 @@ class HouseStatisticsService:
                     value=stats['count'],  # 标签出现次数
                     avg=round(avg_price, 2),  # 该标签的平均价格
                     max=round(max_price, 2),  # 该标签的最大价格
-                    min=round(min_price, 2)   # 该标签的最小价格
+                    min=round(min_price, 2)  # 该标签的最小价格
                 ))
 
         # 按出现次数降序排序
@@ -193,7 +193,7 @@ class HouseStatisticsService:
         return statistics_list
 
     @classmethod
-    def house_type_statistics(cls, statistics_entity)-> List[StatisticsVo]:
+    def house_type_statistics(cls, statistics_entity) -> List[StatisticsVo]:
         """
         获取房屋类型统计数据
         """
@@ -209,11 +209,34 @@ class HouseStatisticsService:
         ) for po in pos]
 
     @classmethod
-    def floor_type_statistics(cls, statistics_entity)-> List[StatisticsVo]:
+    def floor_type_statistics(cls, statistics_entity) -> List[StatisticsVo]:
         """
         获取楼层分析
         """
         pos = HouseStatisticsMapper.floor_type_statistics(statistics_entity)
+        if not pos:
+            return []
+        return [StatisticsVo(
+            name=po.name,
+            value=po.value,
+            avg=po.avg,
+            max=po.max,
+            min=po.min
+        ) for po in pos]
+
+    @classmethod
+    def community_statistics(cls, statistics_entity) -> List[StatisticsVo]:
+        """
+        获取小区分析
+        """
+        limit = 100
+        limit_str = SysConfigService.select_config_by_key(ConfigConstants.STATISTICS_COMMITY_LIMIT)
+        try:
+            if limit_str:
+                limit = int(limit_str)
+        except ValueError:
+            limit = 100
+        pos = HouseStatisticsMapper.community_statistics(statistics_entity, limit)
         if not pos:
             return []
         return [StatisticsVo(

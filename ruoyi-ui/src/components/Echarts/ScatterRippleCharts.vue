@@ -160,13 +160,13 @@ export default {
         title: {
           text: this.chartTitle,
           left: 'center',
-          top: 20,
+          top: '1%',
           textStyle: {color: '#fff', fontSize: 20}
         },
         dataZoom: [
           // X 轴内置缩放
-          {type: 'inside', xAxisIndex: 0, minSpan: 10},
-          {type: 'inside', yAxisIndex: 0, minSpan: 10},
+          {type: 'inside', xAxisIndex: 0, minSpan: 30},
+          {type: 'inside', yAxisIndex: 0, minSpan: 30},
         ],
         tooltip: {
           show: true,

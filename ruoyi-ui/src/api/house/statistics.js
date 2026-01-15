@@ -54,3 +54,12 @@ export function getFloorTypeStatistics(params) {
     params: params
   })
 }
+
+//小区
+export function getCommunityStatistics(params) {
+  return request({
+    url: '/house/statistics/community',
+    method: 'get',
+    params: params
+  })
+}

@@ -177,3 +177,4 @@ class UserConstants:
 
 class ConfigConstants:
     STATISTICS_PRICE_RANGE = "statistics:price:range"
+    STATISTICS_COMMITY_LIMIT = "statistics:commity:limit"

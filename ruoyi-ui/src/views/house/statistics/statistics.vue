@@ -19,6 +19,7 @@
           <div class="chart-wrapper">
             <ScatterGradientZoomCharts
               :chart-title="communityStatisticsName"
+              :chart-data="communityStatisticsData"
             />
           </div>
         </el-col>
@@ -71,6 +72,7 @@ import PieRoundCharts from "@/components/Echarts/PieRoundCharts.vue";
 import ScatterGradientCharts from "@/components/Echarts/ScatterGradientCharts.vue";
 import ScatterRippleCharts from "@/components/Echarts/ScatterRippleCharts.vue";
 import {
+  getCommunityStatistics,
   getFloorTypeStatistics,
   getHouseTypeStatistics,
   getOrientationStatistics,
@@ -141,6 +143,7 @@ export default {
       this.getTagsStatisticsData()
       this.getHouseTypeStatisticsData()
       this.getFloorTypeStatisticsData()
+      this.getCommunityStatisticsData()
     },
     //获取朝向
     getOrientationStatisticsData() {
@@ -170,6 +173,12 @@ export default {
     getFloorTypeStatisticsData() {
       getFloorTypeStatistics(this.statisticsParams).then(res => {
         this.floorTypeStatisticsData = res.data;
+      });
+    },
+    //小区
+    getCommunityStatisticsData() {
+      getCommunityStatistics(this.statisticsParams).then(res => {
+        this.communityStatisticsData = res.data;
       });
     },
     //获取镇
