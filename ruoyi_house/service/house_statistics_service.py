@@ -207,3 +207,19 @@ class HouseStatisticsService:
             max=po.max,
             min=po.min
         ) for po in pos]
+
+    @classmethod
+    def floor_type_statistics(cls, statistics_entity)-> List[StatisticsVo]:
+        """
+        获取楼层分析
+        """
+        pos = HouseStatisticsMapper.floor_type_statistics(statistics_entity)
+        if not pos:
+            return []
+        return [StatisticsVo(
+            name=po.name,
+            value=po.value,
+            avg=po.avg,
+            max=po.max,
+            min=po.min
+        ) for po in pos]

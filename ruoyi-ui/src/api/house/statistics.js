@@ -44,3 +44,13 @@ export function getHouseTypeStatistics(params) {
     params: params
   })
 }
+
+
+//楼层
+export function getFloorTypeStatistics(params) {
+  return request({
+    url: '/house/statistics/floor_type',
+    method: 'get',
+    params: params
+  })
+}
