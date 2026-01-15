@@ -17,3 +17,12 @@ export function getTownStatistics(params) {
     params: params
   })
 }
+
+//价格
+export function getPriceStatistics(params) {
+  return request({
+    url: '/house/statistics/price',
+    method: 'get',
+    params: params
+  })
+}

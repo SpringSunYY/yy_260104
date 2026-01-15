@@ -16,7 +16,8 @@ class HouseStatisticsMapper:
         """
         朝向分析
         select
-            avg(unit_price) as value,
+            count(*) as value,
+            avg(unit_price) as avg,
             max(unit_price) as max,
             min(unit_price) as min,
             orientation as name
@@ -64,7 +65,8 @@ class HouseStatisticsMapper:
         """
         镇分析
         select
-            avg(unit_price) as value,
+            count(*) as value,
+            avg(unit_price) as avg,
             max(unit_price) as max,
             min(unit_price) as min,
             town as name
@@ -88,4 +90,30 @@ class HouseStatisticsMapper:
             return [StatisticsPo(**item) for item in result]
         except Exception as e:
             print(f"获取镇分析数据失败:{e}")
+            return []
+
+    @classmethod
+    def price_statistics(cls, statistics_entity)-> List[StatisticsPo]:
+        """
+        价格分析
+        select
+            count(*) as value,
+            price as name
+        from tb_house
+        group by name
+        order by value desc;
+        """
+        try:
+            # 构建查询条件
+            stmt = select(
+                func.count("*").label("value"),
+                HousePo.unit_price.label("name")
+            ).select_from(HousePo).group_by("name").order_by(db.desc("value"))
+            stmt = cls.builder_where(statistics_entity, stmt)
+            result = db.session.execute(stmt).mappings().all()
+            if not result:
+                return []
+            return [StatisticsPo(**item) for item in result]
+        except Exception as e:
+            print(f"获取价格分析数据失败:{e}")
             return []

@@ -38,7 +38,8 @@
         <el-col :span="6">
           <div class="chart-wrapper">
             <PieRoseHollowCharts
-              :chart-title="priceStatisticsName"/>
+              :chart-title="priceStatisticsName"
+              :chart-data="priceStatisticsData"/>
           </div>
           <div class="chart-wrapper">
             <ScatterRippleCharts
@@ -67,7 +68,7 @@ import PieGhostingCharts from "@/components/Echarts/PieGhostingCharts.vue";
 import PieRoundCharts from "@/components/Echarts/PieRoundCharts.vue";
 import ScatterGradientCharts from "@/components/Echarts/ScatterGradientCharts.vue";
 import ScatterRippleCharts from "@/components/Echarts/ScatterRippleCharts.vue";
-import {getOrientationStatistics, getTownStatistics} from "@/api/house/statistics";
+import {getOrientationStatistics, getPriceStatistics, getTownStatistics} from "@/api/house/statistics";
 
 export default {
   name: "RecommendModel",
@@ -124,11 +125,18 @@ export default {
     //获取统计
     getStatisticsData() {
       this.getOrientationStatisticsData()
+      this.getPriceStatisticsData()
     },
     //获取朝向
     getOrientationStatisticsData() {
       getOrientationStatistics(this.statisticsParams).then(res => {
         this.orientationStatisticsData = res.data;
+      });
+    },
+    //价格
+    getPriceStatisticsData() {
+      getPriceStatistics(this.statisticsParams).then(res => {
+        this.priceStatisticsData = res.data;
       });
     },
     //获取镇
