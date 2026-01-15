@@ -2,6 +2,7 @@ import datetime
 from typing import List
 
 from ruoyi_common.constant import ConfigConstants
+from ruoyi_framework.descriptor import custom_cacheable
 from ruoyi_house.domain.statistics.dto import HouseStatisticsRequest
 from ruoyi_house.domain.statistics.po import StatisticsPo
 from ruoyi_house.domain.statistics.vo import StatisticsVo
@@ -13,6 +14,11 @@ class HouseStatisticsService:
     """房源统计服务类"""
 
     @classmethod
+    @custom_cacheable(
+        key_prefix="statistics:orientation",
+        use_query_params_as_key=True,
+        expire_time=60 * 5
+    )
     def orientation_statistics(cls, statistics_entity: HouseStatisticsRequest) -> List[StatisticsVo]:
         """
         获取房源信息统计数据
@@ -29,6 +35,11 @@ class HouseStatisticsService:
         ) for po in pos]
 
     @classmethod
+    @custom_cacheable(
+        key_prefix="statistics:town",
+        use_query_params_as_key=True,
+        expire_time=60 * 5
+    )
     def town_statistics(cls, statistics_entity) -> List[StatisticsVo]:
         """
         获取房源信息统计数据
@@ -45,6 +56,11 @@ class HouseStatisticsService:
         ) for po in pos]
 
     @classmethod
+    @custom_cacheable(
+        key_prefix="statistics:price",
+        use_query_params_as_key=True,
+        expire_time=60 * 5
+    )
     def price_statistics(cls, statistics_entity) -> List[StatisticsVo]:
         """
         获取房源信息统计数据
@@ -101,6 +117,11 @@ class HouseStatisticsService:
         return statistics_list
 
     @staticmethod
+    @custom_cacheable(
+        key_prefix="statistics:price_predict",
+        use_query_params_as_key=True,
+        expire_time=60 * 5
+    )
     def _get_price_range_label(price: float, price_range: List[int]) -> str:
         """
         根据价格获取范围标签
@@ -132,6 +153,11 @@ class HouseStatisticsService:
                 return f"{w_value:.1f}W"
 
     @classmethod
+    @custom_cacheable(
+        key_prefix="statistics:tags",
+        use_query_params_as_key=True,
+        expire_time=60 * 5
+    )
     def tags_statistics(cls, statistics_entity) -> List[StatisticsVo]:
         """
         获取标签统计数据
@@ -195,6 +221,11 @@ class HouseStatisticsService:
         return statistics_list
 
     @classmethod
+    @custom_cacheable(
+        key_prefix="statistics:house_type",
+        use_query_params_as_key=True,
+        expire_time=60 * 5
+    )
     def house_type_statistics(cls, statistics_entity) -> List[StatisticsVo]:
         """
         获取房屋类型统计数据
@@ -211,6 +242,11 @@ class HouseStatisticsService:
         ) for po in pos]
 
     @classmethod
+    @custom_cacheable(
+        key_prefix="statistics:floor_type",
+        use_query_params_as_key=True,
+        expire_time=60 * 5
+    )
     def floor_type_statistics(cls, statistics_entity) -> List[StatisticsVo]:
         """
         获取楼层分析
@@ -227,6 +263,11 @@ class HouseStatisticsService:
         ) for po in pos]
 
     @classmethod
+    @custom_cacheable(
+        key_prefix="statistics:community",
+        use_query_params_as_key=True,
+        expire_time=60 * 5
+    )
     def community_statistics(cls, statistics_entity) -> List[StatisticsVo]:
         """
         获取小区分析
@@ -250,6 +291,11 @@ class HouseStatisticsService:
         ) for po in pos]
 
     @classmethod
+    @custom_cacheable(
+        key_prefix="statistics:decoration_type",
+        use_query_params_as_key=True,
+        expire_time=60 * 5
+    )
     def decoration_type_statistics(cls, statistics_entity)-> List[StatisticsVo]:
         """
         获取装修类型分析
@@ -265,6 +311,11 @@ class HouseStatisticsService:
             min=po.min
         ) for po in pos]
     @classmethod
+    @custom_cacheable(
+        key_prefix="statistics:price_predict",
+        use_query_params_as_key=True,
+        expire_time=60 * 5
+    )
     def price_predict_detailed(cls, statistics_entity)-> List[StatisticsVo]:
         """
         基于详细数据分析的价格预测 加权线性回归 + 周期扰动
@@ -1029,9 +1080,21 @@ class HouseStatisticsService:
             age_weight = 1.0 + age_ratio * 1.0  # 1.0 到 2.0 之间
 
             # 数据量权重：数量越大权重越高（代表性越强）
-            # 使用比例：数据量占总数据量的比例，归一化到1-2倍权重
-            data_ratio = value / total_data_volume if total_data_volume > 0 else 0
-            data_weight = 1.0 + data_ratio * 10.0  # 根据数据量比例放大权重
+            # 使用对数权重，避免极端值影响
+            if value > 0:
+                # 使用数据量级别的权重，而不是精确比例
+                if value >= 2000:
+                    data_weight = 2.0  # 大量数据
+                elif value >= 1000:
+                    data_weight = 1.6  # 较多数据
+                elif value >= 500:
+                    data_weight = 1.3  # 中等数据
+                elif value >= 100:
+                    data_weight = 1.1  # 少量数据
+                else:
+                    data_weight = 1.0  # 极少数据
+            else:
+                data_weight = 0.5  # 无数据，降低权重
 
             # 时间位置权重：越近的年份在趋势预测中权重略高
             recency_weight = 1 + 0.2 * (1 - 1/(1 + (current_year - year) * 0.5))
@@ -1111,9 +1174,9 @@ class HouseStatisticsService:
 
             prediction = trend_prediction * maturity_factor * cycle_factor
 
-            # 更宽松的约束范围，不要被当前数据少而压低预测
-            min_volume = max(100, base_volume * 0.3)  # 最低100套或基准的30%
-            max_volume = base_volume * 2.0  # 最高2倍基准
+            # 合理的约束范围，避免预测值过于极端
+            min_volume = max(10, base_volume * 0.1)   # 最低10套或基准的10%
+            max_volume = base_volume * 3.0            # 最高3倍基准
             prediction = max(min_volume, min(prediction, max_volume))
 
             print(f"整体数量预测年 {future_year}: 趋势={trend_prediction:.0f}, "
