@@ -41,6 +41,11 @@ export default {
         },
       ]
     },
+    //不需要计算总数的
+    notCalculateTotal: {
+      type: Array,
+      default: () => []
+    },
     defaultIndexName: {
       type: String,
       default: "用户人数"
@@ -67,7 +72,9 @@ export default {
         return summary;
       }
       this.chartData.forEach(dataItem => {
-        if (dataItem && dataItem.name && Array.isArray(dataItem.value)) {
+        if (dataItem && dataItem.name
+          && Array.isArray(dataItem.value)
+          && !this.notCalculateTotal.find(item => item === dataItem.name)) {
           summary[dataItem.name] = dataItem.value.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
         }
       });

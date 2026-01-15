@@ -29,6 +29,7 @@
               :chart-name="townStatisticsName"
               :chart-data="townStatisticsData"
               :default-index-name="defaultIndexName"
+              :not-calculate-total="notCalculateTotal"
               @mapClick="mapClick"/>
           </div>
           <div class="chart-trend-wrapper">
@@ -106,7 +107,8 @@ export default {
       //镇
       townStatisticsData: [],
       townStatisticsName: '东莞市二手房数据分析',
-      defaultIndexName: '总房源数',
+      defaultIndexName: '房源数',
+      notCalculateTotal: ['最低价格','最高价格','平均价格'],
       //价格预测
       pricePredictionData: [],
       pricePredictionName: '价格预测',
@@ -206,7 +208,7 @@ export default {
         }
         this.townStatisticsData = []
         this.townStatisticsData.push({
-          name: "总房源数",
+          name: "房源数",
           value: valueValues
         })
         this.townStatisticsData.push({
