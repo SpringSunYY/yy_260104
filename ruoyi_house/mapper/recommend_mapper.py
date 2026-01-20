@@ -44,8 +44,6 @@ class RecommendMapper:
                 stmt = stmt.where(RecommendPo.create_time >= begin_val)
             if end_val is not None:
                 stmt = stmt.where(RecommendPo.create_time <= end_val)
-            if "criterian_meta" in g and g.criterian_meta.page:
-                g.criterian_meta.page.stmt = stmt
             # 应用数据范围过滤（如果 DataScope 设置了有效的过滤条件）
             if ("criterian_meta" in g and
                     g.criterian_meta.scope is not None and
@@ -53,6 +51,8 @@ class RecommendMapper:
                     g.criterian_meta.scope != ()):
                 stmt = stmt.where(g.criterian_meta.scope)
             stmt = stmt.order_by(RecommendPo.create_time.desc())
+            if "criterian_meta" in g and g.criterian_meta.page:
+                g.criterian_meta.page.stmt = stmt
             result = db.session.execute(stmt).scalars().all()
             return [Recommend.model_validate(item) for item in result] if result else []
         except Exception as e:
