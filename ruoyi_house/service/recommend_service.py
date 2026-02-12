@@ -30,9 +30,9 @@ class RecommendService:
 
     # 时间衰减配置 - 基于最新行为记录的指数衰减
     TIME_DECAY_FACTOR = 0.95  # 每天衰减0.05（即前一天权重为0.95）
-    VIEW_RECORDS_COUNT = 30  # 最新浏览记录数量
+    VIEW_RECORDS_COUNT = 90  # 最新浏览记录数量
     VIEW_NEW_RECORDS_COUNT = 5  # 创建模型后最新浏览记录数量
-    LIKE_RECORDS_COUNT = 5  # 最新点赞记录数量
+    LIKE_RECORDS_COUNT = 30  # 最新点赞记录数量
     LIKE_NEW_RECORDS_COUNT = 1  # 创建模型后最新点赞记录数量
     # 推荐配置
     MAX_RECOMMENDATIONS = 1000  # 最大推荐数量
@@ -377,7 +377,7 @@ class RecommendService:
 
         behaviors = []
 
-        # 获取最新点赞记录（5条）- 按时间倒序
+        # 获取最新点赞记录- 按时间倒序
         like_entity = Like()
         like_entity.user_id = user_id
         like_entity.page_size = cls.LIKE_RECORDS_COUNT
