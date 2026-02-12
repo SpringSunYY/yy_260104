@@ -98,12 +98,15 @@ export default {
       //标签
       tagStatisticsData: [],
       tagStatisticsName: '标签分析',
+      tagStatisticsOriginName: '标签分析',
       //装饰类型
       decorationTypeStatisticsData: [],
       decorationTypeStatisticsName: '装修分析',
+      decorationTypeStatisticsOriginName: '装修分析',
       //价格
       priceStatisticsData: [],
       priceStatisticsName: '价格分析',
+      priceStatisticsOriginName: '价格分析',
 
       //镇
       townStatisticsData: [],
@@ -113,18 +116,23 @@ export default {
       //价格预测
       pricePredictionData: [],
       pricePredictionName: '价格预测',
+      pricePredictionOriginName: '价格预测',
       //户型
       houseTypeStatisticsData: [],
       houseTypeStatisticsName: '户型分析',
+      houseTypeStatisticsOriginName: '户型分析',
       //楼层
       floorTypeStatisticsData: [],
       floorTypeStatisticsName: '楼层分析',
+      floorTypeStatisticsOriginName: '楼层分析',
       //朝向
       orientationStatisticsData: [],
       orientationStatisticsName: '朝向分析',
+      orientationStatisticsOriginName: '朝向分析',
       //小区
       communityStatisticsData: [],
       communityStatisticsName: '小区分析',
+      communityStatisticsOriginName: '小区分析',
 
       statisticsParams: {}
     };
@@ -138,6 +146,14 @@ export default {
     mapClick(locationName) {
       console.log(locationName);
       this.statisticsParams.town = locationName
+      this.tagStatisticsName = locationName + this.tagStatisticsOriginName
+      this.decorationTypeStatisticsName = locationName + this.decorationTypeStatisticsOriginName
+      this.pricePredictionName = locationName + this.pricePredictionOriginName
+      this.priceStatisticsName = locationName + this.priceStatisticsOriginName
+      this.houseTypeStatisticsName = locationName + this.houseTypeStatisticsOriginName
+      this.floorTypeStatisticsName = locationName + this.floorTypeStatisticsOriginName
+      this.orientationStatisticsName = locationName + this.orientationStatisticsOriginName
+      this.communityStatisticsName = locationName + this.communityStatisticsOriginName
       this.getStatisticsData()
     },
     //获取统计
