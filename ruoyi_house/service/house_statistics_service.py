@@ -318,13 +318,13 @@ class HouseStatisticsService:
     )
     def price_predict_detailed(cls, statistics_entity)-> List[StatisticsVo]:
         """
-        基于详细数据分析的价格预测 加权线性回归 + 周期扰动
+        基于多权线性回归的价格预测
 
         核心思路：
         1. 获取每个房子的详细信息
-        2. 按建筑年代分组，但考虑更多影响因素
-        3. 使用多维度分析进行更准确的预测
-        4. 考虑市场成熟度、位置因素、房屋品质等
+        2. 按建筑年代分组，保留多维度信息
+        3. 使用多权线性回归（加权最小二乘法）进行预测
+        4. 综合权重因子：时间权重、数量权重、成熟度权重
         """
         try:
             predict_year_str = SysConfigService.select_config_by_key(ConfigConstants.STATISTICS_PRICE_PREDICT_YEAR)
@@ -370,8 +370,8 @@ class HouseStatisticsService:
             # 按年份排序
             pos.sort(key=lambda x: int(x.name))
 
-            # 生成预测
-            predictions = cls._predict_future_statistics_detailed(pos, predict_year)
+            # 使用多算法融合预测
+            predictions = cls._multi_algorithm_fusion_predict(pos, predict_year)
 
             # 合并历史数据和预测数据
             result = []
@@ -390,7 +390,7 @@ class HouseStatisticsService:
             return result
 
         except Exception as e:
-            print(f"详细价格预测失败: {e}")
+            print(f"多权线性回归价格预测失败: {e}")
             return []
 
     @classmethod
@@ -2365,3 +2365,481 @@ class HouseStatisticsService:
 
         # 对于所有预测年份，使用整体平均值
         return [avg_value] * predict_years
+
+    @classmethod
+    def _weighted_linear_regression(cls, years: List[int], values: List[float], weights: List[float]) -> List[float]:
+        """
+        多权线性回归 - 加权最小二乘法
+
+        Args:
+            years: 年份数据
+            values: 目标值（价格/数量）
+            weights: 权重列表
+
+        Returns:
+            [slope, intercept] 回归系数 for y = slope*x + intercept
+        """
+        if len(years) != len(values) or len(years) != len(weights):
+            return [0.0, sum(values) / len(values) if values else 0.0]
+
+        n = len(years)
+        weights_sum = sum(weights)
+
+        if weights_sum == 0:
+            return [0.0, sum(values) / n if values else 0.0]
+
+        weighted_x = sum(w * x for w, x in zip(weights, years))
+        weighted_y = sum(w * y for w, y in zip(weights, values))
+        weighted_xx = sum(w * x * x for w, x in zip(weights, years))
+        weighted_xy = sum(w * x * y for w, x, y in zip(weights, years, values))
+
+        denominator = weights_sum * weighted_xx - weighted_x * weighted_x
+        if denominator == 0:
+            return [0.0, weighted_y / weights_sum]
+
+        slope = (weights_sum * weighted_xy - weighted_x * weighted_y) / denominator
+        intercept = (weighted_y - slope * weighted_x) / weights_sum
+
+        return [slope, intercept]
+
+    @classmethod
+    def _calculate_regression_confidence(cls, years: List[int], values: List[float], weights: List[float], coeffs: List[float]) -> float:
+        """
+        计算回归模型的置信度
+
+        Args:
+            years: 年份数据
+            values: 目标值
+            weights: 权重列表
+            coeffs: 回归系数 [slope, intercept]
+
+        Returns:
+            置信度分数 0-1
+        """
+        if len(years) < 2 or len(coeffs) < 2:
+            return 0.5
+
+        slope, intercept = coeffs
+        if slope == 0 and intercept == 0:
+            return 0.3
+
+        n = len(years)
+        weights_sum = sum(weights)
+
+        if weights_sum == 0:
+            return 0.3
+
+        mean_y = sum(w * y for w, y in zip(weights, values)) / weights_sum
+        sst = sum(w * (y - mean_y) ** 2 for w, y in zip(weights, values))
+
+        sse = sum(
+            w * (y - (slope * x + intercept)) ** 2
+            for w, x, y in zip(weights, years, values)
+        )
+
+        if sst == 0:
+            return 0.5
+
+        r_squared = max(0, 1 - sse / sst)
+        confidence = min(r_squared * (n / (n - 2)), 1.0)
+
+        return max(0.1, min(confidence, 0.99))
+
+    @classmethod
+    def _multi_algorithm_fusion_predict(cls, historical_data: List[StatisticsPo], predict_years: int) -> List[StatisticsVo]:
+        """
+        多算法融合预测系统 - 整合所有回归算法
+
+        融合算法：
+        1. 加权线性回归 - 长期趋势
+        2. 多项式回归（二次） - 非线性趋势
+        3. 指数平滑 - 短期敏感
+        4. 保守预测 - 稳健估计
+
+        融合策略：根据各算法的历史拟合度（R²）和稳定性动态分配权重
+        """
+        if not historical_data:
+            return []
+
+        years = [int(po.name) for po in historical_data]
+        values = [float(po.value) for po in historical_data]
+        avgs = [float(po.avg) for po in historical_data]
+        maxs = [float(po.max) for po in historical_data]
+        mins = [float(po.min) for po in historical_data]
+
+        if len(years) < 3:
+            return []
+
+        current_year = max(years)
+        last_historical_year = current_year
+
+        print("\n" + "="*60)
+        print("【多算法融合预测系统】")
+        print("="*60)
+
+        # ============================================================
+        # 第一步：计算各年份综合权重
+        # ============================================================
+        def calculate_comprehensive_weights(year_list: List[int], value_list: List[int]) -> List[float]:
+            """
+            计算综合权重 - 核心：近两年数据权重低（新房不稳定）
+            
+            权重策略：
+            - 近1-2年：权重很低（0.1-0.2），因为新房刚进入二手市场，数据不可靠
+            - 3-5年：权重中等（0.5-0.7），市场逐渐成熟
+            - 5-10年：权重较高（0.8-1.0），数据最可靠
+            - 10年以上：权重稳定（1.0），成熟市场数据
+            """
+            weights = []
+            for year, value in zip(year_list, value_list):
+                age = current_year - year
+                
+                # 时间权重：近两年权重大幅降低（新建筑数据不稳定）
+                if age <= 1:
+                    time_weight = 0.1  # 最近1年：权重极低（新房不稳定）
+                elif age <= 2:
+                    time_weight = 0.2  # 最近2年：权重很低
+                elif age <= 3:
+                    time_weight = 0.5  # 第3年：逐渐恢复
+                elif age <= 5:
+                    time_weight = 0.7  # 第4-5年：接近正常
+                elif age <= 10:
+                    time_weight = 0.9  # 第6-10年：正常权重
+                else:
+                    time_weight = 1.0  # 10年以上：最高权重
+                
+                # 数据量权重：数量越大权重越高（代表性越强）
+                if value >= 2000:
+                    volume_weight = 2.0
+                elif value >= 1000:
+                    volume_weight = 1.6
+                elif value >= 500:
+                    volume_weight = 1.3
+                elif value >= 100:
+                    volume_weight = 1.1
+                else:
+                    volume_weight = 0.6
+                
+                # 成熟度权重：老建筑权重高
+                if age <= 2:
+                    maturity_weight = 0.5  # 新建筑，成熟度低
+                elif age <= 5:
+                    maturity_weight = 0.8  # 逐渐成熟
+                elif age <= 10:
+                    maturity_weight = 1.0  # 完全成熟
+                else:
+                    maturity_weight = 1.1  # 超成熟
+                
+                total_weight = time_weight * volume_weight * maturity_weight
+                weights.append(total_weight)
+                
+                print(f"  年份 {year} (房龄{age}年): 时间权重={time_weight:.2f}, 数据权重={volume_weight:.2f}, 成熟度={maturity_weight:.2f}, 总权重={total_weight:.3f}")
+            return weights
+
+        weights = calculate_comprehensive_weights(years, values)
+
+        # ============================================================
+        # 第二步：计算历史数据波动性
+        # ============================================================
+        def calc_volatility(data: List[float]) -> float:
+            if len(data) < 2:
+                return 0.05
+            mean_val = sum(data) / len(data)
+            if mean_val == 0:
+                return 0.05
+            variance = sum((x - mean_val) ** 2 for x in data) / len(data)
+            return min(0.15, max(0.03, (variance ** 0.5) / mean_val))
+
+        value_volatility = calc_volatility(values)
+        price_volatility = calc_volatility(avgs)
+
+        print(f"\n历史波动性分析:")
+        print(f"  数量波动率: {value_volatility:.3f} ({value_volatility*100:.1f}%)")
+        print(f"  价格波动率: {price_volatility:.3f} ({price_volatility*100:.1f}%)")
+
+        # ============================================================
+        # 第三步：算法1 - 加权线性回归
+        # ============================================================
+        print("\n【算法1: 加权线性回归】")
+        linear_coeffs = cls._weighted_linear_regression(years, values, weights)
+        linear_conf = cls._calculate_regression_confidence(years, values, weights, linear_coeffs)
+        print(f"  系数: slope={linear_coeffs[0]:.4f}, intercept={linear_coeffs[1]:.4f}")
+        print(f"  置信度 R²: {linear_conf:.3f}")
+
+        # ============================================================
+        # 第四步：算法2 - 多项式回归（二次）
+        # ============================================================
+        print("\n【算法2: 多项式回归(二次)】")
+        poly_coeffs = cls._polynomial_trend_fit(years, values, degree=2)
+        poly_r2 = cls._calculate_polynomial_r2(years, values, poly_coeffs)
+        print(f"  系数: {poly_coeffs}")
+        print(f"  拟合度 R²: {poly_r2:.3f}")
+
+        # ============================================================
+        # 第五步：算法3 - 指数平滑（降低alpha，减少近期数据影响）
+        # ============================================================
+        print("\n【算法3: 指数平滑】")
+        # alpha降低到0.15，减少近期不稳定数据的权重
+        smoothed_data = cls._exponential_smoothing_data(values, alpha=0.15)
+        exp_smooth_value = smoothed_data[-1]
+        # 使用中期数据的趋势，而非全期
+        mid_point = len(smoothed_data) // 2
+        exp_trend = (smoothed_data[-1] - smoothed_data[mid_point]) / (len(smoothed_data) - mid_point)
+        print(f"  平滑值: {exp_smooth_value:.2f}, 趋势: {exp_trend:.4f} (基于中期数据)")
+
+        # ============================================================
+        # 第六步：算法4 - 保守预测（历史均值）
+        # ============================================================
+        print("\n【算法4: 保守预测】")
+        conservative_value = sum(values) / len(values)
+        print(f"  历史均值: {conservative_value:.2f}")
+
+        # ============================================================
+        # 第七步：计算各算法动态权重（调整：增加稳健算法权重）
+        # ============================================================
+        print("\n【算法权重融合】")
+
+        # 线性回归权重：基于R²，但增加稳定性
+        linear_weight = min(linear_conf, 0.7) * (1 + value_volatility * 0.3)
+
+        # 多项式权重：数据点足够且非线性明显时使用
+        poly_weight = poly_r2 * 0.5 if poly_r2 > linear_conf else poly_r2 * 0.2
+
+        # 指数平滑权重：降低（近期数据不稳定）
+        exp_weight = 0.15 * (1 + value_volatility * 0.5)
+
+        # 保守预测权重：大幅增加（使用历史均值更稳健）
+        conservative_weight = 0.25 * (1 + value_volatility * 0.8)
+
+        # 归一化权重
+        total_weight = linear_weight + poly_weight + exp_weight + conservative_weight
+        linear_weight /= total_weight
+        poly_weight /= total_weight
+        exp_weight /= total_weight
+        conservative_weight /= total_weight
+
+        print(f"  线性回归权重: {linear_weight:.3f} ({linear_weight*100:.1f}%)")
+        print(f"  多项式回归权重: {poly_weight:.3f} ({poly_weight*100:.1f}%)")
+        print(f"  指数平滑权重: {exp_weight:.3f} ({exp_weight*100:.1f}%)")
+        print(f"  保守预测权重: {conservative_weight:.3f} ({conservative_weight*100:.1f}%)")
+
+        # ============================================================
+        # 第八步：生成融合预测
+        # ============================================================
+        print("\n【融合预测结果】")
+        print("-" * 80)
+
+        predictions = []
+        for i in range(predict_years):
+            future_year = last_historical_year + i + 1
+
+            # 算法1：线性回归预测
+            linear_pred = linear_coeffs[0] * future_year + linear_coeffs[1]
+
+            # 算法2：多项式预测
+            if len(poly_coeffs) == 3:
+                poly_pred = poly_coeffs[0] * future_year**2 + poly_coeffs[1] * future_year + poly_coeffs[2]
+            else:
+                poly_pred = linear_pred
+
+            # 算法3：指数平滑 + 趋势外推
+            exp_pred = exp_smooth_value + exp_trend * (i + 1)
+
+            # 算法4：保守预测（带轻微趋势）
+            trend_rate = linear_coeffs[0] / conservative_value if conservative_value > 0 else 0.01
+            conservative_pred = conservative_value * (1 + trend_rate) ** (i + 1)
+
+            # 算法融合
+            fused_value = (linear_weight * linear_pred +
+                         poly_weight * poly_pred +
+                         exp_weight * exp_pred +
+                         conservative_weight * conservative_pred)
+
+            # ============================================================
+            # 约束1：基于加权均值的严格约束（防止无限下降）
+            # ============================================================
+            # 计算基准值（使用3年以上的稳定数据）
+            base_reference = conservative_value
+            
+            # 约束：预测值不能低于基准的50%，不能高于基准的200%
+            min_reasonable = base_reference * 0.5
+            max_reasonable = base_reference * 2.0
+            
+            # 应用基础约束
+            fused_value = max(min_reasonable, min(fused_value, max_reasonable))
+
+            # ============================================================
+            # 约束2：限制周期波动幅度（基于整体波动性）
+            # ============================================================
+            cycle_position = (future_year % 5) / 5.0
+            # 波动幅度限制：根据历史波动性，但设置上下限
+            volatility_limit = min(value_volatility, 0.15)  # 最高15%波动
+            cycle_factor = 1 + volatility_limit * (0.5 - abs(cycle_position - 0.5)) * 2
+
+            # 经济周期（更温和）
+            economic_cycle = 1 + 0.05 * (0.5 - abs((future_year % 7) / 7.0 - 0.5)) * 2
+
+            # 政策周期（温和）
+            policy_cycle = future_year % 5
+            if policy_cycle <= 1:
+                policy_factor = 1.02
+            elif policy_cycle <= 3:
+                policy_factor = 0.98
+            else:
+                policy_factor = 1.00
+
+            # 融合预测
+            final_value = fused_value * cycle_factor * economic_cycle * policy_factor
+            
+            # ============================================================
+            # 约束3：最终约束（防止极端值）
+            # ============================================================
+            # 基于历史数据的整体约束
+            historical_avg = sum(values) / len(values)
+            historical_max = max(values)
+            historical_min = min(values)
+            
+            # 最终约束：不能低于历史的60%，不能高于历史的180%
+            final_min = max(historical_min * 0.6, base_reference * 0.4)
+            final_max = min(historical_max * 1.8, base_reference * 2.5)
+            
+            final_value = max(final_min, min(final_value, final_max))
+
+            # 价格预测（同样多算法融合）
+            avg_pred = cls._multi_algorithm_price_predict(avgs, future_year, price_volatility)
+            max_pred = cls._multi_algorithm_extreme_predict(maxs, future_year, 'max', price_volatility)
+            min_pred = cls._multi_algorithm_extreme_predict(mins, future_year, 'min', price_volatility)
+
+            predictions.append(StatisticsVo(
+                value=max(10, int(final_value)),  # 最小值改为10
+                name=str(future_year),
+                avg=round(max(0, avg_pred), 2),
+                max=round(max(0, max_pred), 2),
+                min=round(max(0, min_pred), 2)
+            ))
+
+            print(f"  {future_year}年: 融合={int(final_value)} | "
+                  f"线性={int(linear_pred)} 多项={int(poly_pred)} 平滑={int(exp_pred)} 保守={int(conservative_pred)} | "
+                  f"约束=[{int(final_min)},{int(final_max)}]")
+
+        print("-" * 80)
+        print(f"多算法融合预测完成，共 {predict_years} 年")
+        print("="*60 + "\n")
+
+        return predictions
+
+    @classmethod
+    def _calculate_polynomial_r2(cls, years: List[int], values: List[float], coeffs: List[float]) -> float:
+        """计算多项式回归的R²"""
+        if len(coeffs) != 3 or len(years) < 3:
+            return 0.3
+
+        n = len(years)
+        mean_y = sum(values) / n
+
+        ss_tot = sum((y - mean_y) ** 2 for y in values)
+        ss_res = 0
+        for x, y in zip(years, values):
+            y_pred = coeffs[0] * x**2 + coeffs[1] * x + coeffs[2]
+            ss_res += (y - y_pred) ** 2
+
+        if ss_tot == 0:
+            return 0.3
+
+        r2 = max(0, 1 - ss_res / ss_tot)
+        return min(r2, 0.99)
+
+    @classmethod
+    def _exponential_smoothing_data(cls, data: List[float], alpha: float = 0.3) -> List[float]:
+        """指数平滑处理"""
+        if not data:
+            return []
+        smoothed = [data[0]]
+        for i in range(1, len(data)):
+            val = alpha * data[i] + (1 - alpha) * smoothed[-1]
+            smoothed.append(val)
+        return smoothed
+
+    @classmethod
+    def _multi_algorithm_price_predict(cls, prices: List[float], future_year: int, volatility: float) -> float:
+        """价格多算法融合预测"""
+        if len(prices) < 3:
+            return prices[-1] if prices else 0
+
+        current_year = 2026  # 假设当前年份
+
+        # 算法1：线性回归
+        n = len(prices)
+        years = list(range(current_year - n + 1, current_year + 1))
+        sum_x, sum_y, sum_xy, sum_xx = 0, 0, 0, 0
+        for x, y in zip(years, prices):
+            sum_x += x
+            sum_y += y
+            sum_xy += x * y
+            sum_xx += x * x
+        denom = n * sum_xx - sum_x * sum_x
+        if denom != 0:
+            slope = (n * sum_xy - sum_x * sum_y) / denom
+            intercept = (sum_y - slope * sum_x) / n
+        else:
+            slope, intercept = 0, sum(prices) / n
+        linear_price = slope * future_year + intercept
+
+        # 算法2：指数平滑
+        alpha = 0.3
+        smoothed = [prices[0]]
+        for i in range(1, len(prices)):
+            smoothed.append(alpha * prices[i] + (1 - alpha) * smoothed[-1])
+        exp_price = smoothed[-1] * (1 + 0.02) ** (future_year - current_year)
+
+        # 算法3：保守预测（均值）
+        conservative_price = sum(prices) / len(prices) * (1 + 0.025) ** (future_year - current_year)
+
+        # 权重分配
+        w_linear, w_exp, w_cons = 0.5, 0.3, 0.2
+
+        # 经济周期调整
+        econ_cycle = 1 + volatility * (0.5 - abs((future_year % 7) / 7.0 - 0.5)) * 2
+
+        fused = (w_linear * linear_price + w_exp * exp_price + w_cons * conservative_price) * econ_cycle
+        return fused
+
+    @classmethod
+    def _multi_algorithm_extreme_predict(cls, extreme_prices: List[float], future_year: int,
+                                        price_type: str, volatility: float) -> float:
+        """极值价格多算法融合预测"""
+        if len(extreme_prices) < 3:
+            return extreme_prices[-1] if extreme_prices else 0
+
+        current_year = 2026
+        n = len(extreme_prices)
+        years = list(range(current_year - n + 1, current_year + 1))
+
+        # 线性回归
+        sum_x, sum_y, sum_xy, sum_xx = 0, 0, 0, 0
+        for x, y in zip(years, extreme_prices):
+            sum_x += x
+            sum_y += y
+            sum_xy += x * y
+            sum_xx += x * x
+        denom = n * sum_xx - sum_x * sum_x
+        slope = (n * sum_xy - sum_x * sum_y) / denom if denom != 0 else 0
+        intercept = (sum_y - slope * sum_x) / n
+        linear_pred = slope * future_year + intercept
+
+        # 指数平滑
+        alpha = 0.4 if price_type == 'max' else 0.3
+        smoothed = [extreme_prices[0]]
+        for i in range(1, len(extreme_prices)):
+            smoothed.append(alpha * extreme_prices[i] + (1 - alpha) * smoothed[-1])
+        exp_pred = smoothed[-1] * (1 + 0.03) ** (future_year - current_year)
+
+        # 融合
+        if price_type == 'max':
+            fused = 0.6 * linear_pred + 0.4 * exp_pred
+            cycle_factor = 1 + volatility * 0.3 * (0.5 - abs((future_year % 4) / 4.0 - 0.5)) * 2
+        else:
+            fused = 0.5 * linear_pred + 0.5 * exp_pred
+            cycle_factor = 1 + volatility * 0.15 * (0.5 - abs((future_year % 6) / 6.0 - 0.5)) * 2
+
+        return fused * cycle_factor

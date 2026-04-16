@@ -166,7 +166,7 @@ class HouseService:
                     house.orientation,  # 朝向
                     house.floor  # 楼层
                 ]
-
+                ##如果为空不保存或者更新数据
                 if any(field is None or (isinstance(field, str) and field.strip() == "") for field in key_fields):
                     skip_count += 1
                     continue

@@ -134,19 +134,31 @@ export default {
     getDataValuesByLocation(locationName) {
       const result = {};
       this.chartData.forEach(dataItem => {
-        const locationData = dataItem.value.find(item =>
-          item.location === locationName ||
-          item.location.includes(locationName) ||
-          locationName.includes(item.location)
-        );
-        result[dataItem.name] = locationData ? locationData.value : 0;
+        const locationData = dataItem.value.find(item => {
+          const itemLocation = item.location;
+          if (itemLocation === locationName) return true;
+          if (itemLocation.includes(locationName) || locationName.includes(itemLocation)) return true;
+          const normalize = (str) => str.replace(/(镇|街道|管委会)$/, '').replace(/\s/g, '');
+          if (normalize(itemLocation) === normalize(locationName)) return true;
+          return false;
+        });
+        result[dataItem.name] = locationData ? (Number(locationData.value) || 0) : 0;
       });
       return result;
     },
 
     getMapData() {
       const features = dongguanGeoJson.features || [];
-      const tmp = features.map(feature => {
+      // 根据 name 去重，保留第一个出现的
+      const seen = new Set();
+      const uniqueFeatures = features.filter(feature => {
+        const name = feature.properties?.name;
+        if (seen.has(name)) return false;
+        seen.add(name);
+        return true;
+      });
+
+      const tmp = uniqueFeatures.map(feature => {
         const {name, adcode, center} = feature.properties || {};
         const dataValues = this.getDataValuesByLocation(name);
         const mainValue = (this.defaultDataItem && dataValues[this.defaultDataItem.name]) || 0;
@@ -178,6 +190,13 @@ export default {
       const max = values.length ? Math.max(...values) : 1000;
       const yCategories = mapData.map(d => d.name);
 
+      // 计算默认指标的排名
+      const sortedByDefault = [...mapData].sort((a, b) => b.value - a.value);
+      const rankMap = {};
+      sortedByDefault.forEach((item, index) => {
+        rankMap[item.name] = index + 1;
+      });
+
       const option = {
         title: {
           left: 'center',
@@ -190,7 +209,8 @@ export default {
           formatter: (params) => {
             if (!params?.data) return '';
             const d = params.data;
-            let content = `<div style="text-align:left">${d.name}<br/>`;
+            const rank = rankMap[d.name] || '-';
+            let content = `<div style="text-align:left"><b>${d.name}</b> (第${rank}名)<br/>`;
             this.chartData.forEach(item => {
               content += `${item.name}：${d[item.name] || 0} <br/>`;
             });
@@ -239,51 +259,46 @@ export default {
             moveOnMouseMove: true
           }
         ],
-        geo: {
-          map: 'dongguan',
-          roam: true,
-          layoutCenter: ['40%', '50%'],
-          scaleLimit: {min: 1, max: 5},
-          layoutSize: '85%',
-          label: {
-            show: true,
-            color: 'rgb(249, 249, 249)',
-            fontSize: 10
-          },
-          itemStyle: {
-            normal: {
-              areaColor: '#24CFF4',
-              borderColor: '#53D9FF',
-              borderWidth: 1.3,
-              shadowBlur: 15,
-              shadowColor: 'rgb(58,115,192)',
-              shadowOffsetY: 6
-            },
-            emphasis: {areaColor: '#8dd7fc'}
-          },
-          // 增加选中样式，确保联动时地图有颜色反馈
-          select: {
-            itemStyle: {areaColor: '#f75a00'},
-            label: {show: true, color: '#fff'}
-          }
-        },
         visualMap: {
           min: 0,
           max: max,
           left: '3%',
           bottom: '5%',
           calculable: true,
-          seriesIndex: [0],
           inRange: {color: ['rgba(123,232,255,0.4)', '#2E98CA', '#0059ff']},
           textStyle: {color: '#24CFF4'},
+          controller: {inRange: {symbolSize: [30, 100]}}
         },
         series: [
           {
             name: '地图',
             type: 'map',
-            geoIndex: 0,
+            map: 'dongguan',
             data: mapData,
-            selectedMode: 'single' // 允许单选高亮
+            selectedMode: 'single',
+            roam: true,
+            layoutCenter: ['40%', '50%'],
+            layoutSize: '85%',
+            label: {
+              show: true,
+              color: 'rgb(249, 249, 249)',
+              fontSize: 10
+            },
+            itemStyle: {
+              normal: {
+                areaColor: '#24CFF4',
+                borderColor: '#53D9FF',
+                borderWidth: 1.3,
+                shadowBlur: 15,
+                shadowColor: 'rgb(58,115,192)',
+                shadowOffsetY: 6
+              },
+              emphasis: {areaColor: '#8dd7fc'}
+            },
+            select: {
+              itemStyle: {areaColor: '#f75a00'},
+              label: {show: true, color: '#fff'}
+            }
           },
           {
             name: '散点',

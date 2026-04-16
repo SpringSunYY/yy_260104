@@ -127,7 +127,7 @@ export default {
           top: '1%',
           textStyle: {
             color: '#0afd00',
-            fontSize: 20,
+            fontSize: 20  ,
             fontWeight: 'bold'
           }
         },
